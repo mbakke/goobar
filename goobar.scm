@@ -23,10 +23,9 @@
 (define %config-file
   ;; TODO: Loop XDG_CONFIG_DIRS, check $HOME, command line arguments, etc.
   (let ((xdg-config-home (getenv "XDG_CONFIG_HOME")))
-    (if (and xdg-config-home
-             (file-exists? (string-append xdg-config-home "/goobar/config.scm")))
-        (string-append xdg-config-home "/goobar/config.scm")
-        #f)))
+    (and xdg-config-home
+         (file-exists? (string-append xdg-config-home "/goobar/config.scm"))
+         (string-append xdg-config-home "/goobar/config.scm"))))
 
 ;; TODO: Handle signals, exceptions.
 (define* (goobar-main #:optional args #:rest rest)
