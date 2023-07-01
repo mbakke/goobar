@@ -30,15 +30,25 @@
 
 ;; TODO: Handle signals, exceptions.
 (define* (goobar-main #:optional args #:rest rest)
-  (let ((header (status-printer-head %status-printer))
-        (printer (status-printer-body %status-printer))
-        (tailer (status-printer-tail %status-printer))
-        (footer (status-printer-foot %status-printer)))
+  ;; TODO: Override printer in config or command line.
+  (let* ((printer (cond
+                   ((isatty? (current-output-port))
+                    (format (current-error-port)
+                            "goobar: auto-detected 'term' output~%")
+                    (get-status-printer 'term))
+                   (else
+                    (format (current-error-port)
+                            "goobar: using 'i3bar' output~%")
+                    (get-status-printer 'i3bar))))
+         (header (status-printer-head printer))
+         (looper (status-printer-body printer))
+         (tailer (status-printer-tail printer))
+         (footer (status-printer-foot printer)))
     (when header (display header))
     (while #true
       (if %config-file
-          (printer (primitive-load %config-file))
-          (printer (default-configuration)))
+          (looper (primitive-load %config-file))
+          (looper (default-configuration)))
       (force-output)
       ;; TODO: Align sleeps with next second and minute, i3status style.
       ;; Also make interval configurable..!

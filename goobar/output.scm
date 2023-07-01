@@ -18,11 +18,12 @@
 (define-module (goobar output)
   #:use-module (srfi srfi-9)
   #:use-module (ice-9 format)
+  #:use-module (ice-9 match)
   #:export (status-printer-head
             status-printer-body
             status-printer-tail
             status-printer-foot
-            %status-printer))
+            get-status-printer))
 
 (define-record-type <status-printer>
   (make-status-printer head body tail foot)
@@ -46,20 +47,15 @@
   (let ((statusen (map status->json status-list)))
     (format #t "[~a]~%" (string-join statusen ","))))
 
-(define %status-printer
-  ;; TODO: Override on command line or config file.
-  (if (isatty? (current-output-port))
-      (begin
-        (format (current-error-port) "goobar: auto-detected 'term' output~%")
-        (make-status-printer
-         #f
-         status-list->terminal-output
-         #f
-         #f))
-      (begin
-        (format (current-error-port) "goobar: using 'i3bar' output~%")
-        (make-status-printer
-         "{\"version\":1}\n[\n"
-         status-list->json-output
-         ","
-         "]\n"))))
+(define (get-status-printer output)
+  (match output
+    ('term (make-status-printer
+            #f
+            status-list->terminal-output
+            #f
+            #f))
+    ('i3bar (make-status-printer
+             "{\"version\":1}\n[\n"
+             status-list->json-output
+             ","
+             "]\n"))))
