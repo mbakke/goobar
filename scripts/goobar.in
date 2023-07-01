@@ -1,0 +1,14 @@
+#!@GUILE@ --no-auto-compile
+;; -*- mode: Scheme -*-
+!#
+
+(define-syntax-rule (push! elt v) (set! v (cons elt v)))
+
+;; Automatically add modules to Guile's load path.
+(unless (getenv "GOOBAR_UNINSTALLED")
+  (push! "@guilemoduledir@" %load-path)
+  (push! "@guileobjectdir@" %load-compiled-path))
+
+(use-modules (goobar))
+
+(apply goobar-main (command-line))
