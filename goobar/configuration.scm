@@ -56,7 +56,7 @@
       ,@(if battery?
             (list (format-battery-status (battery-status "BAT0")))
             '())
-      ,(format-load-status (load-status))
+      ,(load-status)
       ,@(cond
          ((file-exists? "/sys/class/thermal/thermal_zone0/temp")
           (list (format-cpu-temperature-status (cpu-temperature-status))))

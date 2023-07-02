@@ -16,19 +16,31 @@
 ;;; along with Goobar. If not, see <https://www.gnu.org/licenses/>.
 
 (define-module (status collector load)
+  #:use-module (status)
+  #:use-module (ice-9 format)
   #:use-module (ice-9 match)
   #:use-module (ice-9 textual-ports)
+  #:use-module ((ice-9 threads) #:select (total-processor-count))
   #:export (load-status format-load-status))
 
-(define (load-status)
+(define* (load-status #:optional (period '1min)
+                      #:key (threshold
+                             ;; Paint red when above this threshold.
+                             (let ((cpu-count (total-processor-count)))
+                               (if (= 1 cpu-count)
+                                   1
+                                   (- cpu-count 1)))))
   (match (string-split (call-with-input-file "/proc/loadavg" get-string-all) #\ )
     ((1m 5m 15m rest ...)
-     `((icon . "🏋")
-       (1min . ,1m)
-       (5min . ,5m)
-       (15min . ,15m)))))
+     (let* ((data `((1min . ,1m) (5min . ,5m) (15min . ,15m)))
+            (load (string->number (assoc-ref data period))))
+       (make-status
+        "🏋"
+        (if (> load threshold) 'bad 'neutral)
+        load
+        format-load-status)))))
 
-(define* (format-load-status status #:optional (period '1min))
-  (format #f "~a ~a"
-          (assoc-ref status 'icon)
-          (assoc-ref status period)))
+(define* (format-load-status status)
+  (format #f "~a ~f"
+          (status-title status)
+          (status-data status)))
