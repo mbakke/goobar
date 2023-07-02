@@ -21,9 +21,9 @@
             status?
             status-title status-status status-data status-printer
             status-text
-            good?
-            degraded?
-            bad?))
+            status-good?
+            status-degraded?
+            status-bad?))
 
 ;; TODO: Support default values and inheritance à la (guix records)?
 (define-record-type <status>
@@ -37,11 +37,11 @@
 (define (status-text status)
   ((status-printer status) status))
 
-(define (good? status)
+(define (status-good? status)
   (eq? 'good (status-status status)))
 
-(define (degraded? status)
+(define (status-degraded? status)
   (eq? 'degraded (status-status status)))
 
-(define (bad? status)
+(define (status-bad? status)
   (eq? 'bad (status-status status)))
