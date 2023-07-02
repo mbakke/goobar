@@ -40,22 +40,29 @@ IPv6: ❌ | 🖴 81% | 📶 Home Wifi (69%, 144.4 Mb/s) | E: down | 🔋 75.55% 
 ```
 
 To customize it, create `~/.config/goobar/config.scm` and have it return a list of
-strings, typically created from the various `(status collector ...)` modules:
+strings (or `<status>` objects), typically created from the various
+`(status collector ...)` modules:
 
 ```
-(use-modules (status collector battery)
+(use-modules (status)
+             (status collector battery)
              (status collector cpu-usage)
              (status collector disk)
+             (status collector ipv6)
              (status collector load)
              (status collector pulseaudio)
              (status collector time)
-             (status collector wifi))
+             (status collector wifi)
+             (ice-9 format))
 
 (define (magic-8-ball)
   (format #f "🎱 says: ~a" (if (odd? (random 99)) "yes" "no")))
 
 (list (format-disk-status (disk-status "/"))
       (format-disk-status (disk-status "/home"))
+      (let ((ipv6 (ipv6-status)))
+        ;; Don't bother printing the full IPv6 address.
+        (format #f "IPv6: ~a" (if (good? ipv6) "✔" "❌")))
       (let ((wifi-status (wifi-status "wlp0s20f3")))
         (if (assoc-ref wifi-status 'connected?)
             (format #f "~a ~a (~a, ~a)"

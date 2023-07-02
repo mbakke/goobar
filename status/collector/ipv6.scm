@@ -46,4 +46,4 @@
 (define (format-ipv6-status status)
   (format #f "~a: ~a"
           (status-title status)
-          (if (good? status) "✔" "❌")))
+          (if (good? status) (status-text status) "❌")))
