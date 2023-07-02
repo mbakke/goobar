@@ -34,15 +34,15 @@
                    ((isatty? (current-output-port))
                     (format (current-error-port)
                             "goobar: auto-detected 'term' output~%")
-                    (get-status-printer 'term))
+                    (get-goobar-output 'term))
                    (else
                     (format (current-error-port)
                             "goobar: using 'i3bar' output~%")
-                    (get-status-printer 'i3bar))))
-         (header (status-printer-head printer))
-         (looper (status-printer-body printer))
-         (tailer (status-printer-tail printer))
-         (footer (status-printer-foot printer)))
+                    (get-goobar-output 'i3bar))))
+         (header (goobar-output-head printer))
+         (looper (goobar-output-body printer))
+         (tailer (goobar-output-tail printer))
+         (footer (goobar-output-foot printer)))
     (when header (display header))
     (while #true
       (if %config-file

@@ -19,23 +19,23 @@
   #:use-module (srfi srfi-9)
   #:use-module (ice-9 format)
   #:use-module (ice-9 match)
-  #:export (status-printer-head
-            status-printer-body
-            status-printer-tail
-            status-printer-foot
-            get-status-printer))
+  #:export (goobar-output-head
+            goobar-output-body
+            goobar-output-tail
+            goobar-output-foot
+            get-goobar-output))
 
-(define-record-type <status-printer>
-  (make-status-printer head body tail foot)
-  status-printer?
+(define-record-type <goobar-output>
+  (make-goobar-output head body tail foot)
+  goobar-output?
   ;; String printed at program startup.
-  (head status-printer-head)
+  (head goobar-output-head)
   ;; Procedure to run every loop.
-  (body status-printer-body)
+  (body goobar-output-body)
   ;; String printed before next loop (after sleeping).
-  (tail status-printer-tail)
+  (tail goobar-output-tail)
   ;; String to print on exit.
-  (foot status-printer-foot))
+  (foot goobar-output-foot))
 
 (define* (status-list->terminal-output status-list #:key (separator "|"))
   (format #t "~a~%" (string-join status-list separator)))
@@ -47,14 +47,14 @@
   (let ((statusen (map status->json status-list)))
     (format #t "[~a]~%" (string-join statusen ","))))
 
-(define (get-status-printer output)
+(define (get-goobar-output output)
   (match output
-    ('term (make-status-printer
+    ('term (make-goobar-output
             #f
             status-list->terminal-output
             #f
             #f))
-    ('i3bar (make-status-printer
+    ('i3bar (make-goobar-output
              "{\"version\":1}\n[\n"
              status-list->json-output
              ","
