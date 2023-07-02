@@ -50,7 +50,7 @@
                                        network-links))
          (battery? (file-exists? "/sys/class/power_supply/BAT0/uevent")))
     `(,(ipv6-status)
-      ,(format-disk-status (disk-status "/"))
+      ,(disk-status "/")
       ,@(map (lambda (if) (wifi-status if)) wireless-devices)
       ,@(map (lambda (if) (ethernet-status if)) ethernet-devices)
       ,@(if battery?

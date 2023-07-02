@@ -16,6 +16,7 @@
 ;;; along with Goobar. If not, see <https://www.gnu.org/licenses/>.
 
 (define-module (status collector disk)
+  #:use-module (status)
   #:use-module (ice-9 popen)
   #:use-module (ice-9 textual-ports)
   #:use-module (ice-9 match)
@@ -35,16 +36,30 @@
       ;; The output is " USED  AVAIL  PCENT"
       (string-join (cdr lines) "\n"))))
 
-(define (disk-status mount-point)
-  (match (string-tokenize (read-df mount-point))
-    ((used avail pcent)
-     `((icon . "🖴")
-       (mount-point . ,mount-point)
-       (used . ,used)
-       (available . ,avail)
-       (percent-used . ,pcent)))))
+(define (percentage->number threshold)
+  (string->number (string-drop-right threshold 1)))
 
-(define* (format-disk-status status)
-  (format #f "~a ~a"
-          (assoc-ref status 'icon)
-          (assoc-ref status 'percent-used)))
+(define* (disk-status mount-point
+                      #:key (thresholds '((bad . "95%") (degraded . "90%"))))
+  (let ((bad-threshold (percentage->number (assoc-ref thresholds 'bad)))
+        (degraded-threshold (percentage->number (assoc-ref thresholds 'degraded))))
+    (match (string-tokenize (read-df mount-point))
+      ((used avail pcent)
+       ;; TODO: Implement K/M/G/T conversion and thresholds.
+       (let ((percent-used (percentage->number pcent)))
+         (make-status
+          "🖴"
+          (cond ((> percent-used bad-threshold) 'bad)
+                ((> percent-used degraded-threshold) 'degraded)
+                (else 'neutral))
+          `((mount-point . ,mount-point)
+            (used . ,used)
+            (available . ,avail)
+            (percent-used . ,percent-used))
+          format-disk-status))))))
+
+(define (format-disk-status status)
+  (let ((data (status-data status)))
+    (format #f "~a ~d%"
+            (status-title status)
+            (assoc-ref data 'percent-used))))
