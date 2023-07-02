@@ -16,6 +16,7 @@
 ;;; along with Goobar. If not, see <https://www.gnu.org/licenses/>.
 
 (define-module (status collector cpu-temperature)
+  #:use-module (status)
   #:use-module (ice-9 format)
   #:export (cpu-temperature-status format-cpu-temperature-status))
 
@@ -23,13 +24,17 @@
   (call-with-input-file file read))
 
 (define* (cpu-temperature-status
-          #:optional (temperature-file "/sys/class/thermal/thermal_zone0/temp"))
-  (let ((temp (get-temperature temperature-file)))
-    `((icon . "🌡")
-      (temperature . ,temp)
-      (temperature-celsius . ,(round (/ temp 1000))))))
+          #:optional (temperature-file "/sys/class/thermal/thermal_zone0/temp")
+          #:key (threshold 75))
+  (let* ((temp (get-temperature temperature-file))
+         (celsius (round (/ temp 1000))))
+    (make-status
+     "🌡"
+     (if (> celsius threshold) 'bad 'neutral)
+     celsius
+     format-cpu-temperature-status)))
 
 (define (format-cpu-temperature-status status)
   (format #f "~a ~d°C"
-          (assoc-ref status 'icon)
-          (assoc-ref status 'temperature-celsius)))
+          (status-title status)
+          (status-data status)))

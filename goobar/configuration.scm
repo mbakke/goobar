@@ -59,10 +59,9 @@
       ,(load-status)
       ,@(cond
          ((file-exists? "/sys/class/thermal/thermal_zone0/temp")
-          (list (format-cpu-temperature-status (cpu-temperature-status))))
+          (list (cpu-temperature-status)))
          ((file-exists? "/sys/class/hwmon/hwmon0/temp1_input")
-          (list (format-cpu-temperature-status
-                 (cpu-temperature-status "/sys/class/hwmon/hwmon0/temp1_input"))))
+          (list (cpu-temperature-status "/sys/class/hwmon/hwmon0/temp1_input")))
          (else '()))
       ,(format-memory-status (memory-status))
       ,(format-time-status (time-status)))))
