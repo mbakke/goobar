@@ -52,7 +52,7 @@
     `(,(ipv6-status)
       ,(format-disk-status (disk-status "/"))
       ,@(map (lambda (if)
-               (format-wifi-status (wifi-status if)))
+               (wifi-status if))
              wireless-devices)
       ,@(map (lambda (if)
                (format-ethernet-status (ethernet-status if)))
