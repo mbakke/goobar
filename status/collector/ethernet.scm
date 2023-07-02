@@ -16,6 +16,7 @@
 ;;; along with Goobar. If not, see <https://www.gnu.org/licenses/>.
 
 (define-module (status collector ethernet)
+  #:use-module (status)
   #:use-module (status network)
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 format)
@@ -26,20 +27,28 @@
          (speed (link-speed interface))
          (ips (assoc-ref (get-ip-addresses) interface))
          (ipv4 (or (assoc-ref ips 'ipv4) '()))
-         (ipv6 (or (assoc-ref ips 'ipv6) '())))
-    `((interface . ,interface)
-      (carrier? . ,carrier?)
-      (speed . ,speed)
-      (ipv4 . ,ipv4)
-      (ipv6 . ,ipv6)
-      ;; For convenience, add an "IP" key containing the first routable
-      ;; IP address, which is what users want in most cases.
-      (ip . ,(find routable? ipv4)))))
+         (ipv6 (or (assoc-ref ips 'ipv6) '()))
+         ;; For convenience, add an "IP" key containing the first routable
+         ;; IP address, which is what users want in most cases.
+         (ip (find routable? ipv4)))
+    (make-status
+     "E:"
+     (if carrier? (if ip 'good 'degraded) 'bad)
+     `((interface . ,interface)
+       (carrier? . ,carrier?)
+       (speed . ,speed)
+       (ipv4 . ,ipv4)
+       (ipv6 . ,ipv6)
+       (ip . ,ip))
+     format-ethernet-status)))
 
 (define (format-ethernet-status status)
-  (let ((carrier? (assq-ref status 'carrier?)))
+  (let* ((icon (status-title status))
+         (data (status-data status))
+         (carrier? (assq-ref data 'carrier?)))
     (if carrier?
-        (format #f "E: ~a~a"
-                (or (assoc-ref status 'ip) "up")
-                (format #f "~@[ (~d Mbit/s)~]" (assoc-ref status 'speed)))
-        (format #f "E: down"))))
+        (format #f "~a ~a~a"
+                icon
+                (or (assoc-ref data 'ip) "up")
+                (format #f "~@[ (~d Mbit/s)~]" (assoc-ref data 'speed)))
+        (format #f "~a down" icon))))
