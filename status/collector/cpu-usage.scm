@@ -16,10 +16,10 @@
 ;;; along with Goobar. If not, see <https://www.gnu.org/licenses/>.
 
 (define-module (status collector cpu-usage)
+  #:use-module (status)
   #:use-module (ice-9 format)
   #:use-module (ice-9 match)
   #:use-module (ice-9 textual-ports)
-  #:use-module ((ice-9 threads) #:select (current-processor-count))
   #:use-module (srfi srfi-9)
   #:export (cpu-usage-status format-cpu-usage-status))
 
@@ -42,7 +42,7 @@
        (make-cpu-usage user nice system idle
                        (+ user nice system idle))))))
 
-(define (cpu-usage-status)
+(define* (cpu-usage-status #:key (thresholds '((max . 95) (degraded . 90))))
   (let* ((previous %cpu-usage)
          (current (get-cpu-usage))
          (diff-idle (- (cpu-usage-idle current)
@@ -51,10 +51,15 @@
                         (cpu-usage-total previous)))
          (diff-usage (round (* 100 (- 1 (/ diff-idle diff-total))))))
     (set! %cpu-usage current)
-    `((icon . "🔥")
-      (usage . ,diff-usage))))
+    (make-status
+     "🔥"
+     (cond ((> diff-usage (assoc-ref thresholds 'max)) 'bad)
+           ((> diff-usage (assoc-ref thresholds 'degraded)) 'degraded)
+           (else 'neutral))
+     diff-usage
+     format-cpu-usage-status)))
 
 (define (format-cpu-usage-status status)
   (format #f "~a ~2,'0d%"
-          (assoc-ref status 'icon)
-          (assoc-ref status 'usage)))
+          (status-title status)
+          (status-data status)))
