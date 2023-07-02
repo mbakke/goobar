@@ -41,7 +41,7 @@
 
 (define (status->text status)
   (match status
-   ((? status?) ((status-printer status) status))
+   ((? status?) (status-text status))
    ((? string?) status)
    (_ (format #f "can not process ~a" status))))
 
