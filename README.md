@@ -53,6 +53,7 @@ strings (or `<status>` objects), typically created from the various
              (status collector pulseaudio)
              (status collector time)
              (status collector wifi)
+             (goobar colors)
              (ice-9 format))
 
 (define (magic-8-ball)
@@ -62,7 +63,8 @@ strings (or `<status>` objects), typically created from the various
       (format-disk-status (disk-status "/home"))
       (let ((ipv6 (ipv6-status)))
         ;; Don't bother printing the full IPv6 address.
-        (format #f "IPv6: ~a" (if (status-good? ipv6) "✔" "❌")))
+        (colorize (format #f "IPv6: ~a" (if (status-good? ipv6) "✔" "❌"))
+                  (status->color ipv6)))
       (let ((wifi-status (wifi-status "wlp0s20f3")))
         (if (assoc-ref wifi-status 'connected?)
             (format #f "~a ~a (~a, ~a)"
