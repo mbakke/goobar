@@ -88,9 +88,8 @@
          (ssid (assoc-ref data 'ssid)))
     (if (status-bad? status)
         (format #f "~a down" icon)
-        (format #f "~a (~a, ~a at ~a)~a)"
+        (format #f "~a (~a at ~a)~a)"
                 icon
                 (format-signal quality)
-                (format-bitrate bitrate)
                 ssid
                 (format #f "~@[ ~a~]" (assoc-ref data 'ip))))))
