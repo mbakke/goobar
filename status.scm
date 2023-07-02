@@ -25,6 +25,7 @@
             status-good?
             status-degraded?
             status-bad?
+            status-neutral?
             status->color))
 
 ;; TODO: Support default values and inheritance à la (guix records)?
@@ -32,7 +33,7 @@
   (make-status title status data printer)
   status?
   (title status-title)                  ;<string> (often emoji..)
-  (status status-status)                ;'good|'degraded|'bad
+  (status status-status)                ;'good|'degraded|'bad|'neutral
   (data status-data)                    ;any data type
   (printer status-printer))             ;procedure
 
@@ -48,6 +49,11 @@
 (define (status-bad? status)
   (eq? 'bad (status-status status)))
 
+(define (status-neutral? status)
+  (eq? 'neutral (status-status status)))
+
+;; XXX: Perhaps <status> should simply have a color field
+;; instead of good/degraded/bad/neutral states.
 (define (status->color status)
   (match (status-status status)
     ('good "#00FF00")
