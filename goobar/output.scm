@@ -44,7 +44,7 @@
     ((? status?)
      (match (status->color status)
        (#f (colorize status))
-       (_ (colorize (status-text status) (status->color status)))))
+       (_ (colorize (status->string status) (status->color status)))))
     ((? string?) (colorize status))
     ((? colored-string?) status)
     (_ (format #f "can not process ~a" status))))

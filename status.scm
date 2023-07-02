@@ -21,7 +21,7 @@
   #:export (make-status
             status?
             status-title status-status status-data status-printer
-            status-text
+            status->string
             status-good?
             status-degraded?
             status-bad?
@@ -36,7 +36,7 @@
   (data status-data)                    ;any data type
   (printer status-printer))             ;procedure
 
-(define (status-text status)
+(define (status->string status)
   ((status-printer status) status))
 
 (define (status-good? status)
