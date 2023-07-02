@@ -54,8 +54,18 @@
         (_ #f))
       #f))
 
+(define (ansi-colorize status)
+  (let ((color (status->color status))
+        (text (status->text status)))
+    (if color
+        (string-append (hex->ansi-truecolor color)
+                       text
+                       (string #\esc #\[) "0m")
+        text)))
+
 (define* (status-list->terminal-output status-list #:key (separator "|"))
-  (format #t "~a~%" (string-join (map status->text status-list) separator)))
+  (format #t "~a~%"
+          (string-join (map ansi-colorize status-list) separator)))
 
 (define (status->json status)
   (format #f "{\"full_text\":\"~a\"~a}"
