@@ -43,7 +43,7 @@
   (match status
     ((? status?)
      (match (status->color status)
-       (#f (colorize status))
+       (#f (colorize (status->string status)))
        (_ (colorize (status->string status) (status->color status)))))
     ((? string?) (colorize status))
     ((? colored-string?) status)
