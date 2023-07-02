@@ -39,24 +39,26 @@
   ;; String to print on exit.
   (foot goobar-output-foot))
 
-(define (status->text status)
+(define (status->colored-string status)
   (match status
-   ((? status?) (status-text status))
-   ((? string?) status)
-   (_ (format #f "can not process ~a" status))))
+    ((? status?)
+     (match (status->color status)
+       (#f (colorize status))
+       (_ (colorize (status-text status) (status->color status)))))
+    ((? string?) (colorize status))
+    ((? colored-string?) status)
+    (_ (format #f "can not process ~a" status))))
 
 (define (status->color status)
-  (if (status? status)
-      (match (status-status status)
-        ('good (get-color 'green))
-        ('degraded (get-color 'yellow))
-        ('bad (get-color 'red))
-        (_ #f))
-      #f))
+  (match (status-status status)
+    ('good (get-color 'green))
+    ('degraded (get-color 'yellow))
+    ('bad (get-color 'red))
+    (_ #f)))
 
-(define (ansi-colorize status)
-  (let ((color (status->color status))
-        (text (status->text status)))
+(define (ansi-colorize colored-string)
+  (let ((color (colored-string-color colored-string))
+        (text (colored-string-string colored-string)))
     (if color
         (string-append (hex->ansi-truecolor color)
                        text
@@ -65,12 +67,16 @@
 
 (define* (status-list->terminal-output status-list #:key (separator "|"))
   (format #t "~a~%"
-          (string-join (map ansi-colorize status-list) separator)))
+          (string-join (map (compose ansi-colorize status->colored-string)
+                            status-list)
+                       separator)))
 
 (define (status->json status)
-  (format #f "{\"full_text\":\"~a\"~a}"
-          (status->text status)
-          (format #f "~@[,\"color\":\"~a\"~]" (status->color status))))
+  (let ((colored (status->colored-string status)))
+    (format #f "{\"full_text\":\"~a\"~a}"
+            (colored-string-string colored)
+            (format #f "~@[,\"color\":\"~a\"~]"
+                    (colored-string-color colored)))))
 
 (define (status-list->json-output status-list)
   (let ((statusen (map status->json status-list)))
