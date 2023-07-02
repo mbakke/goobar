@@ -29,6 +29,7 @@ bin_SCRIPTS = \
 	scripts/goobar
 
 SOURCES = \
+	status.scm \
 	status/network.scm \
 	status/nl80211.scm \
 	status/collector/battery.scm \

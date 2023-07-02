@@ -16,6 +16,7 @@
 ;;; along with Goobar. If not, see <https://www.gnu.org/licenses/>.
 
 (define-module (goobar output)
+  #:use-module (status)
   #:use-module (srfi srfi-9)
   #:use-module (ice-9 format)
   #:use-module (ice-9 match)
@@ -37,11 +38,17 @@
   ;; String to print on exit.
   (foot goobar-output-foot))
 
+(define (status->text status)
+  (match status
+   ((? status?) ((status-printer status) status))
+   ((? string?) status)
+   (_ (format #f "can not process ~a" status))))
+
 (define* (status-list->terminal-output status-list #:key (separator "|"))
-  (format #t "~a~%" (string-join status-list separator)))
+  (format #t "~a~%" (string-join (map status->text status-list) separator)))
 
 (define (status->json status)
-  (format #f "{\"full_text\":\"~a\"}" status))
+  (format #f "{\"full_text\":\"~a\"}" (status->text status)))
 
 (define (status-list->json-output status-list)
   (let ((statusen (map status->json status-list)))
