@@ -16,6 +16,7 @@
 ;;; along with Goobar. If not, see <https://www.gnu.org/licenses/>.
 
 (define-module (goobar output)
+  #:use-module (goobar colors)
   #:use-module (status)
   #:use-module (srfi srfi-9)
   #:use-module (ice-9 format)
@@ -44,11 +45,22 @@
    ((? string?) status)
    (_ (format #f "can not process ~a" status))))
 
+(define (status->color status)
+  (if (status? status)
+      (match (status-status status)
+        ('good (get-color 'green))
+        ('degraded (get-color 'yellow))
+        ('bad (get-color 'red))
+        (_ #f))
+      #f))
+
 (define* (status-list->terminal-output status-list #:key (separator "|"))
   (format #t "~a~%" (string-join (map status->text status-list) separator)))
 
 (define (status->json status)
-  (format #f "{\"full_text\":\"~a\"}" (status->text status)))
+  (format #f "{\"full_text\":\"~a\"~a}"
+          (status->text status)
+          (format #f "~@[,\"color\":\"~a\"~]" (status->color status))))
 
 (define (status-list->json-output status-list)
   (let ((statusen (map status->json status-list)))
