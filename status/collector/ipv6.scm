@@ -16,13 +16,14 @@
 ;;; along with Goobar. If not, see <https://www.gnu.org/licenses/>.
 
 (define-module (status collector ipv6)
+  #:use-module (status)
   #:export (ipv6-status format-ipv6-status))
 
 (define (ipv6-status)
   (with-exception-handler
       (lambda (err)
         ;; Probably no IPv6 connectivity.  Don't bother printing errors.
-        `((icon . "❌")))
+        (make-status "IPv6" 'bad #f format-ipv6-status))
     (lambda ()
       ;; Attempt to establish a connection to the K root DNS server.  Use
       ;; IP address to avoid DNS lookup.
@@ -37,11 +38,12 @@
              (sock (socket (addrinfo:fam ai) (addrinfo:socktype ai)
                            (addrinfo:protocol ai))))
         (connect sock (addrinfo:addr ai))
-        `((icon . "✔")
-          (ip . ,(inet-ntop AF_INET6 (sockaddr:addr (getsockname sock)))))))
+        (make-status "IPv6" 'good
+                     (inet-ntop AF_INET6 (sockaddr:addr (getsockname sock)))
+                     format-ipv6-status)))
     #:unwind? #t))
 
 (define (format-ipv6-status status)
-  (format #f "IPv6: ~a"
-          (or (assoc-ref status 'ip)
-              (assoc-ref status 'icon))))
+  (format #f "~a: ~a"
+          (status-title status)
+          (if (good? status) "✔" "❌")))
