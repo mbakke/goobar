@@ -18,21 +18,12 @@
 (define-module (goobar colors)
   #:use-module (ice-9 format)
   #:use-module (srfi srfi-9)
-  #:export (get-color
-            hex->ansi-truecolor
+  #:export (hex->ansi-truecolor
             make-colored-string
             colored-string?
             colored-string-string
             colored-string-color
             colorize))
-
-(define %colors
-  '((green . "#00FF00")
-    (yellow . "#FFFF00")
-    (red . "#FF0000")))
-
-(define (get-color color)
-  (assoc-ref %colors color))
 
 (define (hex->ansi-truecolor color)
   ;; TODO: How widely supported is this?  We probably don't need the

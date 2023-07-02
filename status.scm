@@ -17,13 +17,15 @@
 
 (define-module (status)
   #:use-module (srfi srfi-9)
+  #:use-module (ice-9 match)
   #:export (make-status
             status?
             status-title status-status status-data status-printer
             status-text
             status-good?
             status-degraded?
-            status-bad?))
+            status-bad?
+            status->color))
 
 ;; TODO: Support default values and inheritance à la (guix records)?
 (define-record-type <status>
@@ -45,3 +47,10 @@
 
 (define (status-bad? status)
   (eq? 'bad (status-status status)))
+
+(define (status->color status)
+  (match (status-status status)
+    ('good "#00FF00")
+    ('degraded "#FFFF00")
+    ('bad "#FF0000")
+    (_ #f)))

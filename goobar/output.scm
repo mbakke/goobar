@@ -49,13 +49,6 @@
     ((? colored-string?) status)
     (_ (format #f "can not process ~a" status))))
 
-(define (status->color status)
-  (match (status-status status)
-    ('good (get-color 'green))
-    ('degraded (get-color 'yellow))
-    ('bad (get-color 'red))
-    (_ #f)))
-
 (define (ansi-colorize colored-string)
   (let ((color (colored-string-color colored-string))
         (text (colored-string-string colored-string)))
