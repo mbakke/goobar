@@ -16,6 +16,7 @@
 ;;; along with Goobar. If not, see <https://www.gnu.org/licenses/>.
 
 (define-module (status collector memory)
+  #:use-module (status)
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 format)
   #:use-module (ice-9 rdelim)
@@ -24,17 +25,14 @@
 (define (extract-numbers str)
   (string->number (last (string-tokenize str char-set:digit))))
 
-;; TODO: Icon (🐏 is probably too abstract..).
-(define (memory-status)
+(define (get-memory-status)
   (let ((meminfo (open-file "/proc/meminfo" "r")))
     (let loop ((items '()))
       (let ((line (read-line meminfo)))
         (if (eof-object? line)
             (begin
               (close-port meminfo)
-              (let ((memory-used (- (assoc-ref items 'memory-total)
-                                    (assoc-ref items 'memory-available))))
-                (cons `(memory-used . ,memory-used) items)))
+              items)
             (cond
              ((string-prefix? "MemTotal:" line)
               (loop (cons `(memory-total . ,(extract-numbers line)) items)))
@@ -50,9 +48,22 @@
               (loop (cons `(shared-memory . ,(extract-numbers line)) items)))
              (else (loop items))))))))
 
+(define* (memory-status #:key (low-threshold (* 512 1024)))
+  (let* ((status (get-memory-status))
+         (memory-used (- (assoc-ref status 'memory-total)
+                         (assoc-ref status 'memory-available))))
+    (make-status
+     ;; TODO: Icon (🐏 is probably too abstract..).
+     "Mem:"
+     (cond ((< (assoc-ref status 'memory-available) low-threshold) 'bad)
+           (else 'neutral))
+     `((memory-used . ,memory-used)
+       ,@status)
+     format-memory-status)))
+
 ;; TODO: Better representation and defaults + calculate percentages.
-;; (also, why does this differ from i3status..?)
 (define (format-memory-status status)
-  (format #f "~1,1f GiB | ~1,1f GiB"
-          (/ (assoc-ref status 'memory-used) 1024 1024)
-          (/ (assoc-ref status 'memory-available) 1024 1024)))
+  (let ((data (status-data status)))
+    (format #f "~1,1f GiB | ~1,1f GiB"
+            (/ (assoc-ref data 'memory-used) 1024 1024)
+            (/ (assoc-ref data 'memory-available) 1024 1024))))

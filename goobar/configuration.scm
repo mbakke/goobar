@@ -63,5 +63,5 @@
          ((file-exists? "/sys/class/hwmon/hwmon0/temp1_input")
           (list (cpu-temperature-status "/sys/class/hwmon/hwmon0/temp1_input")))
          (else '()))
-      ,(format-memory-status (memory-status))
+      ,(memory-status)
       ,(format-time-status (time-status)))))
