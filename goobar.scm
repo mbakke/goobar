@@ -48,6 +48,7 @@
          (help (option-ref options 'help #f))
          (config-file (option-ref options 'config-file %config-file))
          (interval (string->number (option-ref options 'interval "5")))
+         (one-shot (option-ref options 'one-shot #f))
          (output-format (option-ref options 'output-format #f))
          (printer (cond ((string? output-format)
                          (get-goobar-output (string->symbol output-format)))
@@ -66,6 +67,7 @@
       (if config-file
           (looper (primitive-load config-file))
           (looper (default-configuration)))
+      (when one-shot (break))
       (force-output)
       (aligned-sleep interval)
       (when tailer (display tailer)))

@@ -35,6 +35,8 @@
     (interval (single-char #\i)
               (value #t)
               (predicate ,valid-interval?))
+    ;; TODO: Why is -1 not working?
+    (one-shot (value #f)) ;(single-char #\1)
     (output-format (single-char #\o)
                    (value #t)
                    (predicate ,valid-output?))))
@@ -46,5 +48,6 @@ Usage: goobar [options]
   -c, --config-file    Use this configuration file instead of the default.
   -i, --interval       Seconds to wait between iterations (default 5).
   -o, --output-format  Which output format to use.  Either 'term' or 'i3bar'.
+  --one-shot           Run once and exit instead of looping.
 ")
   (exit 0))
