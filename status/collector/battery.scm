@@ -92,7 +92,12 @@
        ('not-charging "🔌")
        (_  "?"))
      (cond
-      ((and (eq? 'discharging state) (< seconds-remaining 1800)) 'bad)
+      ((and (eq? 'discharging state)
+            (< seconds-remaining 1800)
+            ;; Prevent bad status when just disconnected but seconds-remaining
+            ;; has not been calculated yet.
+            (< energy-percent 50))
+       'bad)
       ((and (eq? 'discharging state) (< energy-percent low-threshold)) 'degraded)
       ((and (eq? 'full state) degraded-when-full?) 'degraded)
       (else 'neutral))
