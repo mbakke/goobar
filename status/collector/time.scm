@@ -16,13 +16,18 @@
 ;;; along with Goobar. If not, see <https://www.gnu.org/licenses/>.
 
 (define-module (status collector time)
+  #:use-module (status)
   #:export (time-status format-time-status))
 
-(define (time-status) (current-time))
+(define* (time-status #:key (time-zone #f))
+  (let ((now (current-time)))
+    (make-status
+     "🕛"
+     'neutral
+     (if (string? time-zone)
+         (localtime now time-zone)
+         (localtime now))
+     format-time-status)))
 
-(define* (format-time-status status
-                             #:optional (format "%F %T")
-                             #:key (time-zone #f))
-  (if (string? time-zone)
-      (strftime format (localtime status time-zone))
-      (strftime format (localtime status))))
+(define* (format-time-status status #:optional (format "%F %T"))
+  (strftime format (status-data status)))

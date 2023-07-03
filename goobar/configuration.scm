@@ -64,4 +64,4 @@
           (list (cpu-temperature-status "/sys/class/hwmon/hwmon0/temp1_input")))
          (else '()))
       ,(memory-status)
-      ,(format-time-status (time-status)))))
+      ,(time-status))))
