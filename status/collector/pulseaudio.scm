@@ -16,6 +16,7 @@
 ;;; along with Goobar. If not, see <https://www.gnu.org/licenses/>.
 
 (define-module (status collector pulseaudio)
+  #:use-module (status)
   #:use-module (ice-9 popen)
   #:use-module (ice-9 textual-ports)
   #:use-module (ice-9 match)
@@ -47,14 +48,18 @@
 (define (pulseaudio-status sink)
   (let* ((mute? (muted? sink))
          (icon (if mute? "🔇" "🔊")))
-    `((icon . ,icon)
-      (volume . ,(volume sink))
-      (mute? . ,mute?))))
+    (make-status
+     icon
+     (if mute? 'degraded 'neutral)
+     `((volume . ,(volume sink))
+       (mute? . ,mute?))
+     format-pulseaudio-status)))
 
 (define (format-pulseaudio-status status)
-  (let ((icon (assoc-ref status 'icon))
-        (mute? (assoc-ref status 'mute?))
-        (volume (assoc-ref status 'volume)))
+  (let* ((icon (status-title status))
+         (data (status-data status))
+         (mute? (assoc-ref data 'mute?))
+         (volume (assoc-ref data 'volume)))
     (if mute?
         (format #f "~a (~a)" icon (string-trim-both volume))
         (format #f "~a ~a" icon (string-trim-both volume)))))
