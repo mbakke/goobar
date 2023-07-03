@@ -39,9 +39,10 @@ IPv6: ❌ | 🖴 81% | 📶 Home Wifi (69%, 144.4 Mb/s) | E: down | 🔋 75.55% 
 [...]
 ```
 
-To customize it, create `~/.config/goobar/config.scm` and have it return a list of
-strings (or `<status>` objects), typically created from the various
-`(status collector ...)` modules:
+It can be customized by creating `~/.config/goobar/config.scm`.  This file
+should return a list of either `<status>` objects, or plain strings.
+
+(note: strings can be "painted" by calling `(colorize "foo" "#FFC0CB")`)
 
 ```
 (use-modules (status)
@@ -59,8 +60,8 @@ strings (or `<status>` objects), typically created from the various
 (define (magic-8-ball)
   (format #f "🎱 says: ~a" (if (odd? (random 99)) "yes" "no")))
 
-(list (format-disk-status (disk-status "/"))
-      (format-disk-status (disk-status "/home"))
+(list (disk-status "/" #:degraded-threshold "80%")
+      (disk-status "/home")
       (let ((ipv6 (ipv6-status)))
         ;; Don't bother printing the full IPv6 address.
         (colorize (format #f "IPv6: ~a" (if (status-good? ipv6) "✔" "❌"))
@@ -71,15 +72,15 @@ strings (or `<status>` objects), typically created from the various
         (if (status-bad? wifi-status)
             (colorize (format-wifi-status wifi-status) color)
             (colorize (format #f "~a ~a (~a%, ~a)"
-                              (status-title wifi)
+                              (status-title wifi-status)
                               (assoc-ref data 'ssid)
                               (assoc-ref data 'quality)
                               (format-bitrate (assoc-ref data 'bitrate)))
                       color)))
-      (format-battery-status (battery-status "BAT0"))
-      (format-load-status (load-status))
-      (format-cpu-usage-status (cpu-usage-status))
-      (format-pulseaudio-status (pulseaudio-status "0"))
+      (battery-status "BAT0")
+      (load-status '5min)
+      (cpu-usage-status)
+      (pulseaudio-status "0")
       (magic-8-ball)
       (format-time-status (time-status) "%d/%m %T"))
 ```
