@@ -42,7 +42,9 @@
        (make-cpu-usage user nice system idle
                        (+ user nice system idle))))))
 
-(define* (cpu-usage-status #:key (thresholds '((max . 95) (degraded . 90))))
+(define* (cpu-usage-status #:key
+                           (bad-threshold 95)
+                           (degraded-threshold 90))
   (let* ((previous %cpu-usage)
          (current (get-cpu-usage))
          (diff-idle (- (cpu-usage-idle current)
@@ -53,8 +55,8 @@
     (set! %cpu-usage current)
     (make-status
      "🔥"
-     (cond ((> diff-usage (assoc-ref thresholds 'max)) 'bad)
-           ((> diff-usage (assoc-ref thresholds 'degraded)) 'degraded)
+     (cond ((> diff-usage bad-threshold) 'bad)
+           ((> diff-usage degraded-threshold) 'degraded)
            (else 'neutral))
      diff-usage
      format-cpu-usage-status)))
