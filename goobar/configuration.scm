@@ -54,7 +54,7 @@
       ,@(map (lambda (if) (wifi-status if)) wireless-devices)
       ,@(map (lambda (if) (ethernet-status if)) ethernet-devices)
       ,@(if battery?
-            (list (format-battery-status (battery-status "BAT0")))
+            (list (battery-status "BAT0"))
             '())
       ,(load-status)
       ,@(cond

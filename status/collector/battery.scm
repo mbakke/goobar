@@ -16,6 +16,7 @@
 ;;; along with Goobar. If not, see <https://www.gnu.org/licenses/>.
 
 (define-module (status collector battery)
+  #:use-module (status)
   #:use-module (ice-9 format)
   #:use-module (ice-9 match)
   #:use-module (ice-9 rdelim)
@@ -73,30 +74,44 @@
       (round (* 60 60 (/ (- energy-full energy-now) power-now))))
      (else 0))))
 
-(define (battery-status battery)
+(define* (battery-status battery #:key
+                         (low-threshold 30)
+                         (high-threshold 90)
+                         (warn-when-full? #t))
   (let* ((status (get-battery-status battery))
+         (seconds-remaining (seconds-remaining status))
          (energy-now (assoc-ref status 'energy-now))
          (energy-full (assoc-ref status 'energy-full))
+         (energy-percent (* 100 (/ energy-now energy-full)))
          (power-now (assoc-ref status 'power-now))
          (state (assoc-ref status 'status)))
-    `((energy-percent . ,(* 100 (/ energy-now energy-full)))
-      (seconds-remaining . ,(seconds-remaining status))
-      ,@(match state
-          ('discharging `((icon . "🔋")))
-          ('charging `((icon . "⚡")))
-          ('full `((icon . "🔋☻")))
-          ('not-charging `((icon . "🔌")))
-          (_ `((icon . "?"))))
-      ,@status)))
+    (make-status
+     (match state
+       ('discharging "🔋")
+       ('charging "⚡")
+       ('full "🔋☻")
+       ('not-charging "🔌")
+       (_  "?"))
+     (cond
+      ((and (eq? 'charging state) (> energy-percent high-threshold)) 'good)
+      ((and (eq? 'discharging state) (< energy-percent low-threshold)) 'bad)
+      ((and (eq? 'discharging state) (< seconds-remaining 1800)) 'bad)
+      ((and (eq? 'full state) warn-when-full?) 'degraded)
+      (else 'neutral))
+     `((energy-percent . ,energy-percent)
+       (seconds-remaining . ,seconds-remaining)
+       ,@status)
+     format-battery-status)))
 
 (define (format-battery-status status)
-  (let* ((seconds (assoc-ref status 'seconds-remaining))
+  (let* ((data (status-data status))
+         (seconds (assoc-ref data 'seconds-remaining))
          (hours minutes-in-seconds (truncate/ seconds 3600))
          (minutes (truncate (/ minutes-in-seconds 60)))
          (time-remaining (if (or (= 0 seconds) (= 0 minutes))
                              ""
                              (format #f " ~2,'0d:~2,'0d" hours minutes))))
     (format #f "~a ~5f%~a"
-            (assoc-ref status 'icon)
-            (assoc-ref status 'energy-percent)
+            (status-title status)
+            (assoc-ref data 'energy-percent)
             time-remaining)))
