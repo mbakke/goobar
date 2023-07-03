@@ -51,10 +51,10 @@
                                        network-links))
          (backlight? (file-exists? "/sys/class/backlight/intel_backlight"))
          (battery? (file-exists? "/sys/class/power_supply/BAT0/uevent")))
-    `(,(ipv6-status)
-      ,(disk-status "/")
+    `(,(disk-status "/")
       ,@(map (lambda (if) (wifi-status if)) wireless-devices)
       ,@(map (lambda (if) (ethernet-status if)) ethernet-devices)
+      ,(ipv6-status)
       ,@(if battery?
             (list (battery-status "BAT0"))
             '())
