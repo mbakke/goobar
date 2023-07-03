@@ -41,6 +41,10 @@
         format-load-status)))))
 
 (define* (format-load-status status)
-  (format #f "~a ~f"
+  ;; Format "~1,2f" correctly gives "1.10" for 1.1, but ".10" for 0.1,
+  ;; which causes needless horizontal shift in the status bar when going
+  ;; from <1 to >=1 or the oppositve.  Work around by using "monetary" style.
+  ;; (XXX: Is it possible to prevent ~f from eliding the 0?)
+  (format #f "~a ~$"
           (status-title status)
           (status-data status)))
