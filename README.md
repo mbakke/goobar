@@ -44,6 +44,8 @@ should return a list of either `<status>` objects, or plain strings.
 
 (note: strings can be "painted" by calling `(colorize "foo" "#FFC0CB")`)
 
+Example:
+
 ```
 (use-modules (status)
              (status collector battery)
@@ -92,7 +94,6 @@ even more bugs.  More status collectors are nice to have.
 
 Planned features that are not yet implemented:
 
-* Colors
 * Bidirectional communication (click events)
 * More output formats (dzen2, xmobar, etc)
 * Tests
