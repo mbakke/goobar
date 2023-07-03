@@ -48,20 +48,16 @@
   (let* ((options (getopt-long args %options))
          (interval (string->number (option-ref options 'interval "5")))
          (help (option-ref options 'help #f))
-         (printer (cond
-                   ((isatty? (current-output-port))
-                    (format (current-error-port)
-                            "goobar: auto-detected 'term' output~%")
-                    (get-goobar-output 'term))
-                   (else
-                    (format (current-error-port)
-                            "goobar: using 'i3bar' output~%")
-                    (get-goobar-output 'i3bar))))
+         (printer (cond ((isatty? (current-output-port))
+                         (get-goobar-output 'term))
+                        (else (get-goobar-output 'i3bar))))
          (header (goobar-output-head printer))
          (looper (goobar-output-body printer))
          (tailer (goobar-output-tail printer))
          (footer (goobar-output-foot printer)))
     (when help (display-help-and-exit))
+    (format (current-error-port) "goobar: using '~a' output~%"
+            (goobar-output-type printer))
     (when header (display header))
     (while #true
       (if %config-file

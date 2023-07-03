@@ -21,15 +21,18 @@
   #:use-module (srfi srfi-9)
   #:use-module (ice-9 format)
   #:use-module (ice-9 match)
-  #:export (goobar-output-head
+  #:export (goobar-output-type
+            goobar-output-head
             goobar-output-body
             goobar-output-tail
             goobar-output-foot
             get-goobar-output))
 
 (define-record-type <goobar-output>
-  (make-goobar-output head body tail foot)
+  (make-goobar-output type head body tail foot)
   goobar-output?
+  ;; Symbol, currently either 'term or 'i3bar.
+  (type goobar-output-type)
   ;; String printed at program startup.
   (head goobar-output-head)
   ;; Procedure to run every loop.
@@ -77,13 +80,11 @@
 
 (define (get-goobar-output output)
   (match output
-    ('term (make-goobar-output
-            #f
-            status-list->terminal-output
-            #f
-            #f))
-    ('i3bar (make-goobar-output
-             "{\"version\":1}\n[\n"
-             status-list->json-output
-             ","
-             "]\n"))))
+    ('term
+     (make-goobar-output 'term #f status-list->terminal-output #f #f))
+    ('i3bar
+     (make-goobar-output 'i3bar
+                         "{\"version\":1}\n[\n"
+                         status-list->json-output
+                         ","
+                         "]\n"))))
