@@ -22,17 +22,24 @@
   (and (string-every char-set:digit opt)
        (positive? (string->number opt))))
 
+(define (valid-output? opt)
+  (member opt '("term" "i3bar")))
+
 (define %options
   `((version (single-char #\v) (value #f))
     (help (single-char #\h) (value #f))
     (interval (single-char #\i)
               (value #t)
-              (predicate ,valid-interval?))))
+              (predicate ,valid-interval?))
+    (output-format (single-char #\o)
+                   (value #t)
+                   (predicate ,valid-output?))))
 
 (define (display-help-and-exit)
   (display "\
 goobar [options]
-  -h, --help      Show this text
-  -i, --interval  Seconds to wait between iterations (default 5)
+  -h, --help           Show this text
+  -i, --interval       Seconds to wait between iterations (default 5)
+  -o, --output-format  Which output format to use.  Either 'term' or 'i3bar'.
 ")
   (exit 0))

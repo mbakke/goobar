@@ -44,11 +44,13 @@
   ;; Handle USR1 so it does not terminate the program, but just interrupts the
   ;; sleep.  Useful for triggering immediate refresh on e.g. volume change.
   (sigaction SIGUSR1 (const #t))
-  ;; TODO: Override printer in config or command line.
   (let* ((options (getopt-long args %options))
          (interval (string->number (option-ref options 'interval "5")))
          (help (option-ref options 'help #f))
-         (printer (cond ((isatty? (current-output-port))
+         (output-format (option-ref options 'output-format #f))
+         (printer (cond ((string? output-format)
+                         (get-goobar-output (string->symbol output-format)))
+                        ((isatty? (current-output-port))
                          (get-goobar-output 'term))
                         (else (get-goobar-output 'i3bar))))
          (header (goobar-output-head printer))
