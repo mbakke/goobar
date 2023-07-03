@@ -46,6 +46,7 @@ SOURCES = \
 	status/collector/wifi.scm \
 	goobar/configuration.scm \
 	goobar/colors.scm \
+	goobar/options.scm \
 	goobar/output.scm \
 	goobar.scm
 

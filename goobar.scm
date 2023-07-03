@@ -16,7 +16,9 @@
 ;;; along with Goobar. If not, see <https://www.gnu.org/licenses/>.
 
 (define-module (goobar)
+  #:use-module (ice-9 getopt-long)
   #:use-module (srfi srfi-19)
+  #:use-module (goobar options)
   #:use-module (goobar output)
   #:autoload (goobar configuration) (default-configuration)
   #:export (goobar-main))
@@ -38,12 +40,15 @@
                (/ (- 1000000000 (time-nanosecond now)) 1000)))))
 
 ;; TODO: How to manage exceptions?
-(define* (goobar-main #:optional args #:rest rest)
+(define (goobar-main . args)
   ;; Handle USR1 so it does not terminate the program, but just interrupts the
   ;; sleep.  Useful for triggering immediate refresh on e.g. volume change.
   (sigaction SIGUSR1 (const #t))
   ;; TODO: Override printer in config or command line.
-  (let* ((printer (cond
+  (let* ((options (getopt-long args %options))
+         (interval (string->number (option-ref options 'interval "5")))
+         (help (option-ref options 'help #f))
+         (printer (cond
                    ((isatty? (current-output-port))
                     (format (current-error-port)
                             "goobar: auto-detected 'term' output~%")
@@ -56,13 +61,13 @@
          (looper (goobar-output-body printer))
          (tailer (goobar-output-tail printer))
          (footer (goobar-output-foot printer)))
+    (when help (display-help-and-exit))
     (when header (display header))
     (while #true
       (if %config-file
           (looper (primitive-load %config-file))
           (looper (default-configuration)))
       (force-output)
-      ;; TODO: Make interval configurable..!
-      (aligned-sleep 5)
+      (aligned-sleep interval)
       (when tailer (display tailer)))
     (when footer (display footer))))
