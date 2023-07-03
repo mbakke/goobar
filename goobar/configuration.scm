@@ -16,6 +16,7 @@
 ;;; along with Goobar. If not, see <https://www.gnu.org/licenses/>.
 
 (define-module (goobar configuration)
+  #:use-module (status collector backlight)
   #:use-module (status collector battery)
   #:use-module (status collector cpu-temperature)
   #:use-module (status collector disk)
@@ -48,6 +49,7 @@
                                                name
                                                #f)))
                                        network-links))
+         (backlight? (file-exists? "/sys/class/backlight/intel_backlight"))
          (battery? (file-exists? "/sys/class/power_supply/BAT0/uevent")))
     `(,(ipv6-status)
       ,(disk-status "/")
@@ -64,4 +66,7 @@
           (list (cpu-temperature-status "/sys/class/hwmon/hwmon0/temp1_input")))
          (else '()))
       ,(memory-status)
+      ,@(if backlight?
+            (list (backlight-status))
+            '())
       ,(time-status))))

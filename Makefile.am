@@ -32,6 +32,7 @@ SOURCES = \
 	status.scm \
 	status/network.scm \
 	status/nl80211.scm \
+	status/collector/backlight.scm \
 	status/collector/battery.scm \
 	status/collector/cpu-temperature.scm \
 	status/collector/cpu-usage.scm \
