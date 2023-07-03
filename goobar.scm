@@ -27,8 +27,11 @@
          (file-exists? (string-append xdg-config-home "/goobar/config.scm"))
          (string-append xdg-config-home "/goobar/config.scm"))))
 
-;; TODO: Handle signals, exceptions.
+;; TODO: How to manage exceptions?
 (define* (goobar-main #:optional args #:rest rest)
+  ;; Handle USR1 so it does not terminate the program, but just interrupts the
+  ;; sleep.  Useful for triggering immediate refresh on e.g. volume change.
+  (sigaction SIGUSR1 (const #t))
   ;; TODO: Override printer in config or command line.
   (let* ((printer (cond
                    ((isatty? (current-output-port))
