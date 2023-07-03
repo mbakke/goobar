@@ -40,17 +40,19 @@
   (string->number (string-drop-right threshold 1)))
 
 (define* (disk-status mount-point
-                      #:key (thresholds '((bad . "95%") (degraded . "90%"))))
-  (let ((bad-threshold (percentage->number (assoc-ref thresholds 'bad)))
-        (degraded-threshold (percentage->number (assoc-ref thresholds 'degraded))))
+                      #:key
+                      (bad-threshold "95%")
+                      (degraded-threshold "90%"))
+  (let ((bad (percentage->number bad-threshold))
+        (degraded (percentage->number degraded-threshold)))
     (match (string-tokenize (read-df mount-point))
       ((used avail pcent)
        ;; TODO: Implement K/M/G/T conversion and thresholds.
        (let ((percent-used (percentage->number pcent)))
          (make-status
           "🖴"
-          (cond ((> percent-used bad-threshold) 'bad)
-                ((> percent-used degraded-threshold) 'degraded)
+          (cond ((> percent-used bad) 'bad)
+                ((> percent-used degraded) 'degraded)
                 (else 'neutral))
           `((mount-point . ,mount-point)
             (used . ,used)
