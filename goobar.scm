@@ -16,6 +16,7 @@
 ;;; along with Goobar. If not, see <https://www.gnu.org/licenses/>.
 
 (define-module (goobar)
+  #:use-module (srfi srfi-19)
   #:use-module (goobar output)
   #:autoload (goobar configuration) (default-configuration)
   #:export (goobar-main))
@@ -26,6 +27,15 @@
     (and xdg-config-home
          (file-exists? (string-append xdg-config-home "/goobar/config.scm"))
          (string-append xdg-config-home "/goobar/config.scm"))))
+
+(define (aligned-sleep interval)
+  ;; To provide updates on (approximately) every full second, we don't
+  ;; (sleep INTERVAL), but instead calculate the number of microseconds until
+  ;; the closest second (+ usec-difference (- interval 1)).  Also attempt
+  ;; aligning to 60 seconds such that we start on :00 every minute.
+  (let ((now (current-time)))
+    (usleep (+ (* 1000000 (- interval 1 (modulo (time-second now) interval)))
+               (/ (- 1000000000 (time-nanosecond now)) 1000)))))
 
 ;; TODO: How to manage exceptions?
 (define* (goobar-main #:optional args #:rest rest)
@@ -52,8 +62,7 @@
           (looper (primitive-load %config-file))
           (looper (default-configuration)))
       (force-output)
-      ;; TODO: Align sleeps with next second and minute, i3status style.
-      ;; Also make interval configurable..!
-      (sleep 5)
+      ;; TODO: Make interval configurable..!
+      (aligned-sleep 5)
       (when tailer (display tailer)))
     (when footer (display footer))))
