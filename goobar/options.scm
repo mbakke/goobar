@@ -18,6 +18,7 @@
 (define-module (goobar options)
   #:export (%options display-help-and-exit))
 
+;; TODO: Print better error messages when validation fails.
 (define (valid-interval? opt)
   (and (string-every char-set:digit opt)
        (positive? (string->number opt))))
@@ -28,6 +29,9 @@
 (define %options
   `((version (single-char #\v) (value #f))
     (help (single-char #\h) (value #f))
+    (config-file (single-char #\c)
+                 (value #t)
+                 (predicate ,file-exists?))
     (interval (single-char #\i)
               (value #t)
               (predicate ,valid-interval?))
@@ -37,9 +41,10 @@
 
 (define (display-help-and-exit)
   (display "\
-goobar [options]
-  -h, --help           Show this text
-  -i, --interval       Seconds to wait between iterations (default 5)
+Usage: goobar [options]
+  -h, --help           Show this text.
+  -c, --config-file    Use this configuration file instead of the default.
+  -i, --interval       Seconds to wait between iterations (default 5).
   -o, --output-format  Which output format to use.  Either 'term' or 'i3bar'.
 ")
   (exit 0))

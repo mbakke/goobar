@@ -24,7 +24,7 @@
   #:export (goobar-main))
 
 (define %config-file
-  ;; TODO: Loop XDG_CONFIG_DIRS, check $HOME, command line arguments, etc.
+  ;; TODO: Loop XDG_CONFIG_DIRS, check $HOME, etc.
   (let ((xdg-config-home (getenv "XDG_CONFIG_HOME")))
     (and xdg-config-home
          (file-exists? (string-append xdg-config-home "/goobar/config.scm"))
@@ -45,8 +45,9 @@
   ;; sleep.  Useful for triggering immediate refresh on e.g. volume change.
   (sigaction SIGUSR1 (const #t))
   (let* ((options (getopt-long args %options))
-         (interval (string->number (option-ref options 'interval "5")))
          (help (option-ref options 'help #f))
+         (config-file (option-ref options 'config-file %config-file))
+         (interval (string->number (option-ref options 'interval "5")))
          (output-format (option-ref options 'output-format #f))
          (printer (cond ((string? output-format)
                          (get-goobar-output (string->symbol output-format)))
@@ -62,8 +63,8 @@
             (goobar-output-type printer))
     (when header (display header))
     (while #true
-      (if %config-file
-          (looper (primitive-load %config-file))
+      (if config-file
+          (looper (primitive-load config-file))
           (looper (default-configuration)))
       (force-output)
       (aligned-sleep interval)
