@@ -25,14 +25,19 @@
 
 (define (backlight-status)
   ;; TODO: Support more drivers..!
-  (let* ((path "/sys/class/backlight/intel_backlight")
-         (brightness (read-backlight-file path "brightness"))
-         (max (read-backlight-file path "max_brightness"))
-         (percentage (round (* 100 (/ brightness max)))))
-    (make-status (if (>= percentage 50) "🔆" "🔅")
-                 'neutral
-                 percentage
-                 format-backlight-status)))
+  (let ((path "/sys/class/backlight/intel_backlight"))
+    (if (file-exists? path)
+        (let* ((brightness (read-backlight-file path "brightness"))
+               (max (read-backlight-file path "max_brightness"))
+               (percentage (round (* 100 (/ brightness max)))))
+          (make-status (if (>= percentage 50) "🔆" "🔅")
+                       'neutral
+                       percentage
+                       format-backlight-status))
+        (make-status #f 'bad #f format-backlight-not-found))))
+
+(define (format-backlight-not-found status)
+  "<no backlight>")
 
 (define (format-backlight-status status)
   (format #f "~a ~d%" (status-title status) (status-data status)))
