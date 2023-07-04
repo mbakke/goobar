@@ -41,6 +41,7 @@ SOURCES = \
 	status/collector/ipv6.scm \
 	status/collector/load.scm \
 	status/collector/memory.scm \
+	status/collector/network-rate.scm \
 	status/collector/pulseaudio.scm \
 	status/collector/time.scm \
 	status/collector/wifi.scm \
