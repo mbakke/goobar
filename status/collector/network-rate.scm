@@ -124,8 +124,7 @@
   (format #f "~a: <no data>" (status-title status)))
 
 (define (format-network-rate status)
-  (let ((interface (status-title status))
-        (data (status-data status)))
+  (let ((data (status-data status)))
     (format #f "⬇️~a/s ⬆️~a/s"
             (format-bytes (assoc-ref data 'rx-bytes/sec))
             (format-bytes (assoc-ref data 'tx-bytes/sec)))))
