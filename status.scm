@@ -57,6 +57,6 @@
 (define (status->color status)
   (match (status-status status)
     ('good "#00FF00")
-    ('degraded "#FFFF00")
+    ('degraded "#FFD000")
     ('bad "#FF0000")
     (_ #f)))
