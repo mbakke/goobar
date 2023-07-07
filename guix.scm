@@ -5,10 +5,14 @@
              (guix gexp)
              (gnu packages autotools)
              (gnu packages base)
+             (gnu packages flex)
+             (gnu packages gettext)
+             (gnu packages gperf)
              (gnu packages guile)
              (gnu packages guile-xyz)
              (gnu packages pkg-config)
              (gnu packages pulseaudio)
+             (gnu packages texinfo)
              ((guix licenses) #:select (gpl3+)))
 
 ;; Use my custom fork of Guile-Netlink with NL80211 support until
@@ -24,6 +28,23 @@
               (sha256
                (base32
                 "1wsqiqm3sqyar3vxmalcirhi811wjgia7mjh8fxgqsashdybyfr8"))))))
+
+;; ... and a custom Guile with statvfs bindings ...
+(define guile/statvfs
+  (package
+    (inherit guile-3.0)
+    (version (string-append (package-version guile-3.0) "+"))
+    (source (origin
+              (method git-fetch)
+              (uri (git-reference
+                    (url "https://github.com/mbakke/guile")
+                    (commit "6fbd1096bbea2a58f888177f2d52148761b288c8")))
+              (sha256
+               (base32
+                "18xrjlhmxq7crsx5vw5cl7dbcnmqznpxphsgnil1byalinb3j5yd"))))
+    (native-inputs
+     (modify-inputs (package-native-inputs guile-3.0)
+       (prepend autoconf automake flex gnu-gettext gperf libtool texinfo)))))
 
 (package
   (name "goobar")
@@ -64,8 +85,8 @@
                                                 "/site-ccache"))
                                deps)))))))))))))
   (native-inputs
-   (list autoconf automake guile-3.0 pkg-config))
-  (inputs (list coreutils-minimal guile-3.0 guile-netlink/nl80211 pulseaudio))
+   (list autoconf automake guile/statvfs pkg-config))
+  (inputs (list coreutils-minimal guile/statvfs guile-netlink/nl80211 pulseaudio))
   (home-page "https://github.com/mbakke/goobar")
   (synopsis "Status line generator")
   (description

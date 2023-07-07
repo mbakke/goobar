@@ -24,17 +24,27 @@
   #:use-module (goobar external)
   #:export (disk-status format-disk-status))
 
-;; TODO: Get rid of DF!
+;; TODO: Remove this and read-disk below when Guile with statvfs is released.
 (define (read-df mount-point)
   (let* ((input (open-input-pipe (string-append %df
-                                                " -h --output=used,avail,pcent "
+                                                " -B1 --output=size,used,avail "
                                                 mount-point)))
          (data (get-string-all input)))
     (close-port input)
     ;; Drop the first line of data (header).
     (let ((lines (string-split data #\newline)))
-      ;; The output is " USED  AVAIL  PCENT"
-      (string-join (cdr lines) "\n"))))
+      ;; The output is '(SIZE USED AVAIL).
+      (map string->number (string-tokenize (string-join (cdr lines) "\n"))))))
+
+(define (read-statvfs mount-point)
+  (match (statvfs mount-point)
+    (#(bsize fsize total free avail rest ...)
+     (let ((used (- total avail)))
+       (map (lambda (blocks)
+              (* blocks fsize))
+            (list total used avail))))))
+
+(define read-disk read-@STATVFS_OR_DF@) ;chosen at build time
 
 (define (percentage->number threshold)
   (string->number (string-drop-right threshold 1)))
@@ -45,18 +55,19 @@
                       (degraded-threshold "90%"))
   (let ((bad (percentage->number bad-threshold))
         (degraded (percentage->number degraded-threshold)))
-    (match (string-tokenize (read-df mount-point))
-      ((used avail pcent)
+    (match (read-disk mount-point)
+      ((total used avail)
        ;; TODO: Implement K/M/G/T conversion and thresholds.
-       (let ((percent-used (percentage->number pcent)))
+       (let ((percent-used (ceiling (* 100 (/ used total)))))
          (make-status
           "🖴"
           (cond ((> percent-used bad) 'bad)
                 ((> percent-used degraded) 'degraded)
                 (else 'neutral))
           `((mount-point . ,mount-point)
-            (used . ,used)
-            (available . ,avail)
+            ;; Force GiB for now.
+            (used . ,(ceiling (/ used 1024 1024 1024)))
+            (available . ,(ceiling (/ avail 1024 1024 1024)))
             (percent-used . ,percent-used))
           format-disk-status))))))
 

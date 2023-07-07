@@ -10,6 +10,9 @@ AC_CONFIG_FILES([scripts/goobar], [chmod +x scripts/goobar])
 AC_CONFIG_FILES([ goobar/external.scm ])
 AC_CONFIG_FILES([ Makefile ])
 
+dnl Check common programs
+AC_PROG_SED
+
 dnl Check for the required programs.
 GUILE_PKG([3.0])
 GUILE_PROGS
@@ -38,13 +41,18 @@ AS_IF([test ! "x$have_guile_netlink_nl80211" = "xyes"], [
   AC_MSG_ERROR([Guile-Netlink is too old (1.2.0 or higher is required)])
 ])
 
-dnl TODO: Use statvfs with Guile somehow instead of df.
-AC_ARG_VAR(DF, [df path])
-AC_PATH_PROG(DF, [df])
-if test -z "$DF"
-then
-  AC_MSG_ERROR([df not found, please install coreutils])
-fi
+GUILE_MODULE_CHECK([have_guile_statvfs], [(guile)], [(statvfs (getcwd))], ["statvfs"])
+AM_CONDITIONAL([HAVE_GUILE_STATVFS], [test "x$have_guile_statvfs" = "xyes"])
+AS_IF([test ! "x$have_guile_statvfs" = "xyes"], [
+  AC_MSG_NOTICE([statvfs is not available in Guile, deferring to `df'])
+  AC_ARG_VAR(DF, [df path])
+  AC_PATH_PROG(DF, [df])
+  if test -z "$DF"
+  then
+    AC_MSG_ERROR([df not found either, please install coreutils or upgrade Guile!])
+  fi
+])
+
 
 dnl TODO: Make it optional.
 AC_ARG_VAR(PACTL, [pactl path])

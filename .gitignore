@@ -11,3 +11,4 @@ build-aux
 pre-inst-env
 goobar/external.scm
 scripts/goobar
+status/collector/disk.scm

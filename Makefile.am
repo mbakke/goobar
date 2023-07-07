@@ -25,6 +25,18 @@ SUFFIXES = .scm .go
 	$(AM_V_GEN)$(top_builddir)/pre-inst-env $(GUILE_TOOLS) compile \
 	$(GUILE_WARNINGS) -o "$@" "$<"
 
+if HAVE_GUILE_STATVFS
+STATVFS_OR_DF = statvfs
+else
+STATVFS_OR_DF = df
+endif
+
+do_subst = $(SED) \
+	-e 's,[@]STATVFS_OR_DF[@],$(STATVFS_OR_DF),g'
+
+status/collector/disk.scm: status/collector/disk.scm.in Makefile
+	$(do_subst) < $< > $@
+
 bin_SCRIPTS = \
 	scripts/goobar
 
