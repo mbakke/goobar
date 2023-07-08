@@ -43,9 +43,8 @@
   (transmit interface-statistics-transmit))
 
 (define (get-network-statistics)
-  (let* ((data (call-with-input-file "/proc/net/dev" get-string-all))
-         (lines (string-split data #\newline)))
-    (match lines
+  (let ((data (call-with-input-file "/proc/net/dev" get-string-all)))
+    (match (string-split data #\newline)
       ((_ fields interfaces ...)
        (match-let (((_ rx-fields tx-fields) (string-split fields #\|)))
          (let ((rx-counters (string-tokenize rx-fields))
@@ -58,18 +57,18 @@
                    (match tokens
                      (() (loop (- count 1) stats))
                      ((ifname counters ...)
-                      (loop (- count 1)
-                            (alist-cons (string-drop-right ifname 1)
-                                        (make-interface-statistics
-                                         (zip rx-counters counters)
-                                         (zip tx-counters
-                                              (list-tail counters
-                                                         (length rx-counters))))
-                                        stats)))))))))))))
+                      (let ((numeric-counters (map string->number counters)))
+                        (loop (- count 1)
+                              (alist-cons (string-drop-right ifname 1)
+                                          (make-interface-statistics
+                                           (zip rx-counters numeric-counters)
+                                           (zip tx-counters
+                                                (list-tail numeric-counters
+                                                           (length rx-counters))))
+                                          stats))))))))))))))
 
-(define (calculate-rate new old seconds)
-  ;; Not ideal to cast here, but very convenient...
-  (/ (- (string->number new) (string->number old)) seconds))
+(define (calculate-rate new old interval)
+  (/ (- new old) interval))
 
 (define (network-rate-status interface)
   (let* ((now (current-time))
