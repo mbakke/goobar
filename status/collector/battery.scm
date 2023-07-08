@@ -84,12 +84,16 @@
                          (degraded-when-full? #t))
   (let ((status (get-battery-status battery)))
     (if status
-        (let* ((seconds-remaining (seconds-remaining status))
-               (energy-now (assoc-ref status 'energy-now))
-               (energy-full (assoc-ref status 'energy-full))
-               (energy-percent (* 100 (/ energy-now energy-full)))
-               (power-now (assoc-ref status 'power-now))
-               (state (assoc-ref status 'status)))
+        (let ((seconds-remaining (seconds-remaining status))
+              ;; Use the reported "design capacity" when available to get an
+              ;; indication of the battery health.  energy-full will decrease
+              ;; as the battery degrades, but energy-full-design is static.
+              ;; This may cause energy-percent to exceed 100 when the battery
+              ;; is healthy, and full being reported at < 100 when degrading.
+              (energy-percent (* 100 (/ (assoc-ref status 'energy-now)
+                                        (or (assoc-ref status 'energy-full-design)
+                                            (assoc-ref status 'energy-full)))))
+              (state (assoc-ref status 'status)))
           (make-status
            (match state
              ('discharging "🔋")
@@ -124,7 +128,7 @@
          (time-remaining (if (or (= 0 seconds) (= 0 minutes))
                              ""
                              (format #f " ~2,'0d:~2,'0d" hours minutes))))
-    (format #f "~a ~5f%~a"
+    (format #f "~a ~,2f%~a"
             (status-title status)
             (assoc-ref data 'energy-percent)
             time-remaining)))
