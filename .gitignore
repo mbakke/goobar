@@ -1,5 +1,6 @@
 *~
 *.log
+*.trs
 *.go
 aclocal.m4
 config.status
@@ -9,6 +10,7 @@ Makefile.in
 autom4te.cache
 build-aux
 pre-inst-env
+test-env
 goobar/external.scm
 scripts/goobar
 status/collector/disk.scm

@@ -63,6 +63,14 @@ SOURCES = \
 	goobar/output.scm \
 	goobar.scm
 
+TEST_EXTENSIONS = .sh
+
+TESTS = \
+	tests/goobar/test-config.sh
+
+SH_LOG_COMPILER = $(top_builddir)/test-env $(SHELL)
+AM_SH_LOG_FLAGS = -x -e
+
 EXTRA_DIST = \
 	$(SOURCES) \
 	pre-inst-env.in \

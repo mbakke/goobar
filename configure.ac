@@ -6,6 +6,7 @@ AC_CONFIG_SRCDIR(configure)
 AM_INIT_AUTOMAKE([foreign -Wall -Wno-portability])
 
 AC_CONFIG_FILES([pre-inst-env], [chmod +x pre-inst-env])
+AC_CONFIG_FILES([test-env], [chmod +x test-env])
 AC_CONFIG_FILES([scripts/goobar], [chmod +x scripts/goobar])
 AC_CONFIG_FILES([ goobar/external.scm ])
 AC_CONFIG_FILES([ Makefile ])
