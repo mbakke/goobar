@@ -1,4 +1,7 @@
 #!/bin/sh
 
+# Ensure the users configuration file do not interfere with tests.
+unset XDG_CONFIG_HOME
+
 "@abs_top_builddir@/pre-inst-env" "$@"
 exit $?
