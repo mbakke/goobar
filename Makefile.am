@@ -60,6 +60,7 @@ SOURCES = \
 	goobar/configuration.scm \
 	goobar/colors.scm \
 	goobar/options.scm \
+	goobar/output/element.scm \
 	goobar/output.scm \
 	goobar.scm
 

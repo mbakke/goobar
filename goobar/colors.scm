@@ -17,15 +17,7 @@
 
 (define-module (goobar colors)
   #:use-module (ice-9 match)
-  #:use-module (ice-9 format)
-  #:use-module (srfi srfi-9)
-  #:export (status->color
-            hex->ansi-truecolor
-            make-colored-string
-            colored-string?
-            colored-string-string
-            colored-string-color
-            colorize))
+  #:export (status->color hex->ansi-truecolor))
 
 (define (status->color status)
   (match status
@@ -44,14 +36,3 @@
         (b (string->number (substring color 5 7) 16)))
     (string-append (string #\esc #\[)
                    (format #f "38;2;~d;~d;~dm" r g b))))
-
-;; This record type is a hack to easily paint a custom string.  Not
-;; a great API, simplification wanted!
-(define-record-type <colored-string>
-  (make-colored-string string color)
-  colored-string?
-  (string colored-string-string)
-  (color colored-string-color))
-
-(define* (colorize string #:optional (color #f))
-  (make-colored-string string color))

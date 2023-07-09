@@ -16,8 +16,7 @@
 ;;; along with Goobar. If not, see <https://www.gnu.org/licenses/>.
 
 (define-module (goobar output)
-  #:use-module (goobar colors)
-  #:use-module (status)
+  #:use-module (goobar output element)
   #:use-module (srfi srfi-9)
   #:use-module (ice-9 format)
   #:use-module (ice-9 match)
@@ -42,40 +41,14 @@
   ;; String to print on exit.
   (foot goobar-output-foot))
 
-(define (status->colored-string status)
-  (match status
-    ((? status?)
-     (match (status->color (status-status status))
-       (#f (colorize (status->string status)))
-       (color (colorize (status->string status) color))))
-    ((? string?) (colorize status))
-    ((? colored-string?) status)
-    (_ (format #f "can not process ~a" status))))
-
-(define (ansi-colorize colored-string)
-  (let ((color (colored-string-color colored-string))
-        (text (colored-string-string colored-string)))
-    (if color
-        (string-append (hex->ansi-truecolor color)
-                       text
-                       (string #\esc #\[) "0m")
-        text)))
-
 (define* (status-list->terminal-output status-list #:key (separator "|"))
   (format #t "~a~%"
-          (string-join (map (compose ansi-colorize status->colored-string)
+          (string-join (map (compose element->ansi-colored-string status->element)
                             status-list)
                        separator)))
 
-(define (status->json status)
-  (let ((colored (status->colored-string status)))
-    (format #f "{\"full_text\":\"~a\"~a}"
-            (colored-string-string colored)
-            (format #f "~@[,\"color\":\"~a\"~]"
-                    (colored-string-color colored)))))
-
 (define (status-list->json-output status-list)
-  (let ((statusen (map status->json status-list)))
+  (let ((statusen (map (compose element->json status->element) status-list)))
     (format #t "[~a]~%" (string-join statusen ","))))
 
 (define (get-goobar-output output)
