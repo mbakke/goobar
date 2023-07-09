@@ -78,7 +78,7 @@
           (full-text (status->string status))
           (short-text #f)
           (color (match status
-                   ((? status?) (status->color (status-status status)))
+                   ((? status?) (status->color (status-state status)))
                    (_ #f)))
           (background #f)
           (border #f)

@@ -19,7 +19,7 @@
   #:use-module (srfi srfi-9)
   #:export (make-status
             status?
-            status-title status-status status-data status-printer
+            status-title status-state status-data status-printer
             status->string
             status-good?
             status-degraded?
@@ -28,10 +28,10 @@
 
 ;; TODO: Support default values and inheritance à la (guix records)?
 (define-record-type <status>
-  (make-status title status data printer)
+  (make-status title state data printer)
   status?
   (title status-title)                  ;<string> (often emoji..)
-  (status status-status)                ;'good|'degraded|'bad|'neutral
+  (state status-state)                  ;'good|'degraded|'bad|'neutral
   (data status-data)                    ;any data type
   (printer status-printer))             ;procedure
 
@@ -39,13 +39,13 @@
   ((status-printer status) status))
 
 (define (status-good? status)
-  (eq? 'good (status-status status)))
+  (eq? 'good (status-state status)))
 
 (define (status-degraded? status)
-  (eq? 'degraded (status-status status)))
+  (eq? 'degraded (status-state status)))
 
 (define (status-bad? status)
-  (eq? 'bad (status-status status)))
+  (eq? 'bad (status-state status)))
 
 (define (status-neutral? status)
-  (eq? 'neutral (status-status status)))
+  (eq? 'neutral (status-state status)))
