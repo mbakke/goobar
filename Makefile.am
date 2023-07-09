@@ -57,6 +57,7 @@ SOURCES = \
 	status/collector/pulseaudio.scm \
 	status/collector/time.scm \
 	status/collector/wifi.scm \
+	goobar/annotation.scm \
 	goobar/configuration.scm \
 	goobar/colors.scm \
 	goobar/options.scm \

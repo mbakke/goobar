@@ -17,6 +17,7 @@
 
 (define-module (goobar output)
   #:use-module (goobar output element)
+  #:use-module (goobar annotation)
   #:use-module (srfi srfi-9)
   #:use-module (ice-9 format)
   #:use-module (ice-9 match)

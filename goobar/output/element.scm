@@ -20,7 +20,6 @@
   #:use-module (ice-9 match)
   #:use-module (ice-9 format)
   #:use-module (goobar colors)
-  #:use-module (status)
   #:export (make-element
             element?
             element-name
@@ -41,8 +40,6 @@
             element-block-width
             element-markup
 
-            annotate
-            status->element
             element->ansi-colored-string
             element->json))
 
@@ -69,45 +66,6 @@
   (separator? element-separator?)
   (block-width element-separator-block-width)
   (markup element-markup))
-
-(define* (annotate
-          obj
-          #:key
-          (name (match obj
-                  ((? status?) (status-title obj))
-                  (_ #f)))
-          (instance #f)
-          (full-text (match obj
-                       ((? status?) (status->string obj))
-                       ((? string?) obj)
-                       ;; TODO: Maybe error here..?
-                       (_ #f)))
-          (short-text #f)
-          (color (match obj
-                   ((? status?) (status->color (status-state obj)))
-                   (_ #f)))
-          (background #f)
-          (border #f)
-          (border-top #f)
-          (border-bottom #f)
-          (border-left #f)
-          (border-right #f)
-          (min-width #f)
-          (align #f)
-          (urgent? #f)
-          (separator? #f)
-          (block-width #f)
-          (markup #f))
-  (make-element name instance full-text short-text color background
-                border border-top border-bottom border-left border-right
-                min-width align urgent? separator? block-width markup))
-
-(define (status->element status)
-  (match status
-    ((? status?) (annotate status))
-    ((? string?) (annotate status #:name status #:full-text status))
-    ((? element?) status)
-    (_ (format #f "can not process ~a" status))))
 
 (define (element->ansi-colored-string element)
   (let ((color (element-color element))
