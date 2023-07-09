@@ -42,6 +42,10 @@ IPv6: ❌ | 🖴 81% | 📶 Home Wifi (69%, 144.4 Mb/s) | E: down | 🔋 75.55% 
 It can be customized by creating `~/.config/goobar/config.scm`.  This file
 should return a list of either `<status>` objects, or plain strings.
 
+Statuses or strings can be "annotated" to provide extra properties, such as
+custom color, width, alignment, etc.  See `man 7 swaybar-protocol` for a
+list of properties, all of which are supported by `(goobar annotation)`.
+
 Example:
 
 ```
@@ -51,13 +55,16 @@ Example:
              (status collector disk)
              (status collector ipv6)
              (status collector load)
+             (status collector network-rate)
              (status collector pulseaudio)
              (status collector time)
              (status collector wifi)
+             (goobar annotation)
              (ice-9 format))
 
-(define (magic-8-ball)
-  (format #f "🎱 says: ~a" (if (odd? (random 99)) "yes" "no")))
+(define (random-color)
+  (format #f "#~2,'0x~2,'0x~2,'0x"
+          (random 255) (random 255) (random 255)))
 
 (list (disk-status "/" #:degraded-threshold "80%")
       (disk-status "/home")
@@ -65,23 +72,32 @@ Example:
        ;; Don't bother printing the full IPv6 address.
        #:format (lambda (status)
                   (if (status-good? status) "IPv6: ✔" "IPv6: ❌")))
-      (wifi-status
-       "wlp0s20f3"
-       #:format (lambda (status)
-                  (let ((icon (status-title status))
-                        (data (status-data status)))
-                    (if (status-bad? status)
-                        (format #f "~a down" icon)
-                        (format #f "~a ~a (~a%, ~a)"
-                                icon
-                                (assoc-ref data 'ssid)
-                                (assoc-ref data 'quality)
-                                (format-bitrate (assoc-ref data 'bitrate)))))))
+      (annotate
+       (wifi-status "wlp0s20f3"
+                    #:format
+                    (lambda (status)
+                      (let ((icon (status-title status))
+                            (data (status-data status)))
+                        (if (status-bad? status)
+                            (format #f "~a down" icon)
+                            (format #f "~a ~a (~a%, ~a)"
+                                    icon
+                                    (assoc-ref data 'ssid)
+                                    (assoc-ref data 'quality)
+                                    (format-bitrate (assoc-ref data 'bitrate)))))))
+       ;; Disable separator to meld with the rate status below.
+       #:separator? #f)
+      (network-rate-status "wlp0s20f3"
+                           #:format
+                           (lambda (status)
+                             (let* ((data (status-data status))
+                                    (down (assoc-ref data 'rx-bytes/sec)))
+                               (format-bytes down))))
       (battery-status "BAT0")
       (load-status '5min)
       (cpu-usage-status)
       (pulseaudio-status "0")
-      (magic-8-ball)
+      (annotate (format #f "Hi ~a!" (getenv "USER")) #:color (random-color))
       (time-status "%d/%m %T"))
 ```
 
