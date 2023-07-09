@@ -19,6 +19,7 @@
   #:use-module (status)
   #:use-module (status network)
   #:use-module (status nl80211)
+  #:use-module (ice-9 exceptions)
   #:use-module (ice-9 format)
   #:use-module (srfi srfi-1)
   #:export (wifi-status format-signal format-bitrate))
@@ -32,38 +33,49 @@
 (define* (wifi-status interface #:key
                       (format format-wifi-status)
                       (quality-treshold 50))
-  (let* ((bss (nl80211-bss-info interface))
-         (status (assoc-ref bss 'status))
-         (connected? (if (member status '(associated ibss-joined)) #t #f))
-         (bssid (assoc-ref bss 'bssid))
-         (ssid (assoc-ref bss 'ssid))
-         (sta (if bssid (nl80211-station-info interface bssid) '()))
-         (signal (assoc-ref sta 'signal))
-         (quality (and signal (signal->percentage signal)))
-         (bitrate (assoc-ref sta 'bitrate))
-         (ips (assoc-ref (get-ip-addresses) interface))
-         (ipv4 (or (assoc-ref ips 'ipv4) '()))
-         (ipv6 (or (assoc-ref ips 'ipv6) '()))
-         ;; For convenience, add an "IP" key containing the first routable
-         ;; IP address, which is what users want in most cases.
-         (ip (find routable? ipv4)))
-    (make-status
-     "📶"
-     (if (and connected? ssid)
-         (if (and ip (> quality quality-treshold))
-             'good
-             'degraded)
-         'bad)
-     `((interface . ,interface)
-       (connected? . ,connected?)
-       (ssid . ,ssid)
-       (signal . ,signal)                ;dBm
-       (quality . ,quality)              ;percentage
-       (bitrate . ,bitrate)              ;Kb/s
-       (ipv4 . ,ipv4)
-       (ipv6 . ,ipv6)
-       (ip . ,ip))
-     format)))
+  (with-exception-handler
+      (lambda (err)
+        (make-status "📶" 'bad err format-wifi-status-exception))
+    (lambda ()
+      (let* ((bss (nl80211-bss-info interface))
+             (status (assoc-ref bss 'status))
+             (connected? (if (member status '(associated ibss-joined)) #t #f))
+             (bssid (assoc-ref bss 'bssid))
+             (ssid (assoc-ref bss 'ssid))
+             (sta (if bssid (nl80211-station-info interface bssid) '()))
+             (signal (assoc-ref sta 'signal))
+             (quality (and signal (signal->percentage signal)))
+             (bitrate (assoc-ref sta 'bitrate))
+             (ips (assoc-ref (get-ip-addresses) interface))
+             (ipv4 (or (assoc-ref ips 'ipv4) '()))
+             (ipv6 (or (assoc-ref ips 'ipv6) '()))
+             ;; For convenience, add an "IP" key containing the first routable
+             ;; IP address, which is what users want in most cases.
+             (ip (find routable? ipv4)))
+        (make-status
+         "📶"
+         (if (and connected? ssid)
+             (if (and ip (> quality quality-treshold))
+                 'good
+                 'degraded)
+             'bad)
+         `((interface . ,interface)
+           (connected? . ,connected?)
+           (ssid . ,ssid)
+           (signal . ,signal)           ;dBm
+           (quality . ,quality)         ;percentage
+           (bitrate . ,bitrate)         ;Kb/s
+           (ipv4 . ,ipv4)
+           (ipv6 . ,ipv6)
+           (ip . ,ip))
+         format)))
+    #:unwind? #t))
+
+(define (format-wifi-status-exception status)
+  (let ((err (status-data status)))
+    (format #f "~a: ~a"
+            (exception-irritants err)
+            (exception-kind err))))
 
 (define (format-signal signal)
   (if signal
