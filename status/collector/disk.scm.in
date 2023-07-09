@@ -54,23 +54,28 @@
                       (format format-disk-status)
                       (bad-threshold "95%")
                       (degraded-threshold "90%"))
-  (let ((bad (percentage->number bad-threshold))
-        (degraded (percentage->number degraded-threshold)))
-    (match (read-disk mount-point)
-      ((total used avail)
-       ;; TODO: Implement K/M/G/T conversion and thresholds.
-       (let ((percent-used (ceiling (* 100 (/ used total)))))
-         (make-status
-          "🖴"
-          (cond ((> percent-used bad) 'bad)
-                ((> percent-used degraded) 'degraded)
-                (else 'neutral))
-          `((mount-point . ,mount-point)
-            ;; Force GiB for now.
-            (used . ,(ceiling (/ used 1024 1024 1024)))
-            (available . ,(ceiling (/ avail 1024 1024 1024)))
-            (percent-used . ,percent-used))
-          format))))))
+  (if (file-exists? mount-point)
+      (let ((bad (percentage->number bad-threshold))
+            (degraded (percentage->number degraded-threshold)))
+        (match (read-disk mount-point)
+          ((total used avail)
+           ;; TODO: Implement K/M/G/T conversion and thresholds.
+           (let ((percent-used (ceiling (* 100 (/ used total)))))
+             (make-status
+              "🖴"
+              (cond ((> percent-used bad) 'bad)
+                    ((> percent-used degraded) 'degraded)
+                    (else 'neutral))
+              `((mount-point . ,mount-point)
+                ;; Force GiB for now.
+                (used . ,(ceiling (/ used 1024 1024 1024)))
+                (available . ,(ceiling (/ avail 1024 1024 1024)))
+                (percent-used . ,percent-used))
+              format)))))
+      (make-status "🖴" 'bad mount-point format-mount-point-not-found)))
+
+(define (format-mount-point-not-found status)
+  (format #f "~a: not found" (status-data status)))
 
 (define (format-disk-status status)
   (let ((data (status-data status)))
