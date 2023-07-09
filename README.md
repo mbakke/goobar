@@ -42,8 +42,6 @@ IPv6: ❌ | 🖴 81% | 📶 Home Wifi (69%, 144.4 Mb/s) | E: down | 🔋 75.55% 
 It can be customized by creating `~/.config/goobar/config.scm`.  This file
 should return a list of either `<status>` objects, or plain strings.
 
-(note: strings can be "painted" by calling `(colorize "foo" "#FFC0CB")`)
-
 Example:
 
 ```
@@ -56,7 +54,6 @@ Example:
              (status collector pulseaudio)
              (status collector time)
              (status collector wifi)
-             (goobar colors)
              (ice-9 format))
 
 (define (magic-8-ball)
@@ -91,13 +88,13 @@ Example:
 # Contributing
 
 Pull requests welcome!  There are a bunch of TODOs in the code, and probably
-even more bugs.  More status collectors are nice to have.
+even more bugs.  Feel free to add more status collectors.  Note that the
+status collector API is subject to change, feedback wanted.
 
 Planned features that are not yet implemented:
 
 * Bidirectional communication (click events)
 * More output formats (dzen2, xmobar, etc)
-* Tests
 
 # License
 
