@@ -2,6 +2,7 @@
 ;; -*- mode: Scheme -*-
 !#
 
+;; This code is taken from Haunt.
 (define-syntax-rule (push! elt v) (set! v (cons elt v)))
 
 ;; Automatically add modules to Guile's load path.
