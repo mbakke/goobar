@@ -66,7 +66,8 @@ SOURCES = \
 TEST_EXTENSIONS = .sh
 
 TESTS = \
-	tests/goobar/test-config.sh
+	tests/goobar/test-config.sh \
+	tests/goobar/test-output.sh
 
 SH_LOG_COMPILER = $(top_builddir)/test-env $(SHELL)
 AM_SH_LOG_FLAGS = -x -e

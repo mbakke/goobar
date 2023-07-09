@@ -13,6 +13,7 @@
              (gnu packages pkg-config)
              (gnu packages pulseaudio)
              (gnu packages texinfo)
+             (gnu packages web)
              ((guix licenses) #:select (gpl3+)))
 
 ;; Use my custom fork of Guile-Netlink with NL80211 support until
@@ -85,7 +86,7 @@
                                                 "/site-ccache"))
                                deps)))))))))))))
   (native-inputs
-   (list autoconf automake guile/statvfs pkg-config))
+   (list autoconf automake guile/statvfs jq pkg-config))
   (inputs (list coreutils-minimal guile/statvfs guile-netlink/nl80211 pulseaudio))
   (home-page "https://github.com/mbakke/goobar")
   (synopsis "Status line generator")
