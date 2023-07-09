@@ -58,4 +58,5 @@
     ((? status?) (annotate status))
     ((? string?) (annotate status #:name status #:full-text status))
     ((? element?) status)
-    (_ (format #f "can not process ~a" status))))
+    (_ (annotate (format #f "can not process ~a" status)
+                 #:color (status->color 'bad)))))
