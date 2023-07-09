@@ -17,10 +17,10 @@
 
 (define-module (goobar colors)
   #:use-module (ice-9 match)
-  #:export (status->color hex->ansi-truecolor))
+  #:export (state->color hex->ansi-truecolor))
 
-(define (status->color status)
-  (match status
+(define (state->color state)
+  (match state
     ('good "#00FF00")
     ('degraded "#FFD000")
     ('bad "#FF0000")

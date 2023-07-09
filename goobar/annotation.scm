@@ -35,7 +35,7 @@
                                 (_ #f)))
                    (short-text #f)
                    (color (match obj
-                            ((? status?) (status->color (status-state obj)))
+                            ((? status?) (state->color (status-state obj)))
                             (_ #f)))
                    (background #f)
                    (border #f)
@@ -59,4 +59,4 @@
     ((? string?) (annotate status #:name status #:full-text status))
     ((? element?) status)
     (_ (annotate (format #f "can not process ~a" status)
-                 #:color (status->color 'bad)))))
+                 #:color (state->color 'bad)))))
