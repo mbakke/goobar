@@ -41,7 +41,7 @@
             element-block-width
             element-markup
 
-            annotate-status
+            annotate
             status->element
             element->ansi-colored-string
             element->json))
@@ -70,15 +70,21 @@
   (block-width element-separator-block-width)
   (markup element-markup))
 
-(define* (annotate-status
-          status
+(define* (annotate
+          obj
           #:key
-          (name (status-title status))
+          (name (match obj
+                  ((? status?) (status-title obj))
+                  (_ #f)))
           (instance #f)
-          (full-text (status->string status))
+          (full-text (match obj
+                       ((? status?) (status->string obj))
+                       ((? string?) obj)
+                       ;; TODO: Maybe error here..?
+                       (_ #f)))
           (short-text #f)
-          (color (match status
-                   ((? status?) (status->color (status-state status)))
+          (color (match obj
+                   ((? status?) (status->color (status-state obj)))
                    (_ #f)))
           (background #f)
           (border #f)
@@ -98,8 +104,8 @@
 
 (define (status->element status)
   (match status
-    ((? status?) (annotate-status status))
-    ((? string?) (annotate-status status #:name status #:full-text status))
+    ((? status?) (annotate status))
+    ((? string?) (annotate status #:name status #:full-text status))
     ((? element?) status)
     (_ (format #f "can not process ~a" status))))
 
