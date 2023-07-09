@@ -77,7 +77,24 @@
         text)))
 
 (define (element->json element)
-  (format #f "{\"full_text\":\"~a\"~a}"
+  (format #f "{\"full_text\":\"~a\"~a~a~a~a~a~a~a~a~a~a~a~a~a~a~a~a}"
           (element-full-text element)
-          (format #f "~@[,\"color\":\"~a\"~]"
-                  (element-color element))))
+          (format #f "~@[,\"short_text\":\"~a\"~]" (element-short-text element))
+          (format #f "~@[,\"color\":\"~a\"~]" (element-color element))
+          (format #f "~@[,\"background\":\"~a\"~]" (element-background element))
+          (format #f "~@[,\"border\":\"~a\"~]" (element-border element))
+          (format #f "~@[,\"border_top\":\"~d\"~]" (element-border-top element))
+          (format #f "~@[,\"border_bottom\":\"~d\"~]" (element-border-bottom element))
+          (format #f "~@[,\"border_left\":\"~d\"~]" (element-border-left element))
+          (format #f "~@[,\"border_right\":\"~d\"~]" (element-border-right element))
+          (format #f "~@[,\"min_width\":\"~a\"~]" (element-min-width element))
+          (format #f "~@[,\"align\":\"~a\"~]" (element-align element))
+          (format #f "~@[,\"name\":\"~a\"~]" (element-name element))
+          (format #f "~@[,\"instance\":\"~a\"~]" (element-instance element))
+          (format #f "~@[,\"urgent\":\"~a\"~]"
+                  (if (element-urgent? element) "true" #f))
+          (format #f "~@[,\"separator\":\"~a\"~]"
+                  (if (element-separator? element) #f "false"))
+          (format #f "~@[,\"separator_block_width\":\"~d\"~]"
+                  (element-separator-block-width element))
+          (format #f "~@[,\"markup\":\"~a\"~]" (element-markup element))))
