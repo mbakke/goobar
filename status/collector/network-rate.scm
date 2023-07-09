@@ -22,7 +22,7 @@
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
   #:use-module (status)
-  #:export (network-rate-status))
+  #:export (network-rate-status format-bytes))
 
 (define-record-type <interface-cache>
   (make-interface-cache timestamp interfaces)
