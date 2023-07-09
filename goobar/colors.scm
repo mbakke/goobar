@@ -16,14 +16,23 @@
 ;;; along with Goobar. If not, see <https://www.gnu.org/licenses/>.
 
 (define-module (goobar colors)
+  #:use-module (ice-9 match)
   #:use-module (ice-9 format)
   #:use-module (srfi srfi-9)
-  #:export (hex->ansi-truecolor
+  #:export (status->color
+            hex->ansi-truecolor
             make-colored-string
             colored-string?
             colored-string-string
             colored-string-color
             colorize))
+
+(define (status->color status)
+  (match status
+    ('good "#00FF00")
+    ('degraded "#FFD000")
+    ('bad "#FF0000")
+    (_ #f)))
 
 (define (hex->ansi-truecolor color)
   ;; TODO: How widely supported is this?  We probably don't need the

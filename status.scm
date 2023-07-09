@@ -17,7 +17,6 @@
 
 (define-module (status)
   #:use-module (srfi srfi-9)
-  #:use-module (ice-9 match)
   #:export (make-status
             status?
             status-title status-status status-data status-printer
@@ -25,8 +24,7 @@
             status-good?
             status-degraded?
             status-bad?
-            status-neutral?
-            status->color))
+            status-neutral?))
 
 ;; TODO: Support default values and inheritance à la (guix records)?
 (define-record-type <status>
@@ -51,12 +49,3 @@
 
 (define (status-neutral? status)
   (eq? 'neutral (status-status status)))
-
-;; XXX: Perhaps <status> should simply have a color field
-;; instead of good/degraded/bad/neutral states.
-(define (status->color status)
-  (match (status-status status)
-    ('good "#00FF00")
-    ('degraded "#FFD000")
-    ('bad "#FF0000")
-    (_ #f)))

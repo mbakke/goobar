@@ -45,9 +45,9 @@
 (define (status->colored-string status)
   (match status
     ((? status?)
-     (match (status->color status)
+     (match (status->color (status-status status))
        (#f (colorize (status->string status)))
-       (_ (colorize (status->string status) (status->color status)))))
+       (color (colorize (status->string status) color))))
     ((? string?) (colorize status))
     ((? colored-string?) status)
     (_ (format #f "can not process ~a" status))))
