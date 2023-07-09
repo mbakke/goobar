@@ -21,15 +21,17 @@
   #:use-module (ice-9 match)
   #:use-module (ice-9 textual-ports)
   #:use-module ((ice-9 threads) #:select (total-processor-count))
-  #:export (load-status format-load-status))
+  #:export (load-status))
 
 (define* (load-status #:optional (period '1min)
-                      #:key (threshold
-                             ;; Paint red when above this threshold.
-                             (let ((cpu-count (total-processor-count)))
-                               (if (= 1 cpu-count)
-                                   1
-                                   (- cpu-count 1)))))
+                      #:key
+                      (format format-load-status)
+                      (threshold
+                       ;; Paint red when above this threshold.
+                       (let ((cpu-count (total-processor-count)))
+                         (if (= 1 cpu-count)
+                             1
+                             (- cpu-count 1)))))
   (match (string-split (call-with-input-file "/proc/loadavg" get-string-all) #\ )
     ((1m 5m 15m rest ...)
      (let* ((data `((1min . ,1m) (5min . ,5m) (15min . ,15m)))
@@ -37,14 +39,7 @@
        (make-status
         "🏋"
         (if (> load threshold) 'bad 'neutral)
-        load
-        format-load-status)))))
+        load format)))))
 
 (define* (format-load-status status)
-  ;; Format "~1,2f" correctly gives "1.10" for 1.1, but ".10" for 0.1,
-  ;; which causes needless horizontal shift in the status bar when going
-  ;; from <1 to >=1 or the oppositve.  Work around by using "monetary" style.
-  ;; (XXX: Is it possible to prevent ~f from eliding the 0?)
-  (format #f "~a ~$"
-          (status-title status)
-          (status-data status)))
+  (format #f "~a ~,2f" (status-title status) (status-data status)))

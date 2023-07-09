@@ -22,7 +22,7 @@
   #:use-module (ice-9 match)
   #:use-module (ice-9 format)
   #:use-module (goobar external)
-  #:export (disk-status format-disk-status))
+  #:export (disk-status))
 
 ;; TODO: Remove this and read-disk below when Guile with statvfs is released.
 (define (read-df mount-point)
@@ -51,6 +51,7 @@
 
 (define* (disk-status mount-point
                       #:key
+                      (format format-disk-status)
                       (bad-threshold "95%")
                       (degraded-threshold "90%"))
   (let ((bad (percentage->number bad-threshold))
@@ -69,7 +70,7 @@
             (used . ,(ceiling (/ used 1024 1024 1024)))
             (available . ,(ceiling (/ avail 1024 1024 1024)))
             (percent-used . ,percent-used))
-          format-disk-status))))))
+          format))))))
 
 (define (format-disk-status status)
   (let ((data (status-data status)))

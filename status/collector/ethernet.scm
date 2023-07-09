@@ -20,9 +20,10 @@
   #:use-module (status network)
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 format)
-  #:export (ethernet-status format-ethernet-status))
+  #:export (ethernet-status))
 
-(define (ethernet-status interface)
+(define* (ethernet-status interface
+                          #:key (format format-ethernet-status))
   (let* ((carrier? (carrier? interface))
          (speed (link-speed interface))
          (ips (assoc-ref (get-ip-addresses) interface))
@@ -40,7 +41,7 @@
        (ipv4 . ,ipv4)
        (ipv6 . ,ipv6)
        (ip . ,ip))
-     format-ethernet-status)))
+     format)))
 
 (define (format-ethernet-status status)
   (let* ((icon (status-title status))

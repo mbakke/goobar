@@ -17,16 +17,18 @@
 
 (define-module (status collector time)
   #:use-module (status)
-  #:export (time-status format-time-status))
+  #:export (time-status))
 
 (define* (time-status #:optional (template "%F %T")
-                      #:key (time-zone #f))
+                      #:key
+                      (format format-time-status)
+                      (time-zone #f))
   (let* ((now (current-time))
          (local (if (string? time-zone)
                     (localtime now time-zone)
                     (localtime now)))
          (formatted (strftime template local)))
-    (make-status "🕛" 'neutral formatted format-time-status)))
+    (make-status "🕛" 'neutral formatted format)))
 
 (define (format-time-status status)
   (status-data status))

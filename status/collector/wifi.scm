@@ -21,10 +21,7 @@
   #:use-module (status nl80211)
   #:use-module (ice-9 format)
   #:use-module (srfi srfi-1)
-  #:export (wifi-status
-            format-signal
-            format-bitrate
-            format-wifi-status))
+  #:export (wifi-status format-signal format-bitrate))
 
 (define (signal->percentage signal)
   ;; This algorithm is taken from i3status (who took it from NetworkManager).
@@ -32,7 +29,9 @@
         (signal-max -20))
     (- 100 (* 70 (/ (- signal-max signal) (- signal-max noise-floor))))))
 
-(define* (wifi-status interface #:key (quality-treshold 50))
+(define* (wifi-status interface #:key
+                      (format format-wifi-status)
+                      (quality-treshold 50))
   (let* ((bss (nl80211-bss-info interface))
          (status (assoc-ref bss 'status))
          (connected? (if (member status '(associated ibss-joined)) #t #f))
@@ -64,7 +63,7 @@
        (ipv4 . ,ipv4)
        (ipv6 . ,ipv6)
        (ip . ,ip))
-     format-wifi-status)))
+     format)))
 
 (define (format-signal signal)
   (if signal

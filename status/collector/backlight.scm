@@ -18,12 +18,12 @@
 (define-module (status collector backlight)
   #:use-module (status)
   #:use-module (ice-9 format)
-  #:export (backlight-status format-backlight-status))
+  #:export (backlight-status))
 
 (define (read-backlight-file path file)
   (call-with-input-file (string-append path "/" file) read))
 
-(define (backlight-status)
+(define* (backlight-status #:key (format format-backlight-status))
   ;; TODO: Support more drivers..!
   (let ((path "/sys/class/backlight/intel_backlight"))
     (if (file-exists? path)
@@ -31,9 +31,7 @@
                (max (read-backlight-file path "max_brightness"))
                (percentage (round (* 100 (/ brightness max)))))
           (make-status (if (>= percentage 50) "🔆" "🔅")
-                       'neutral
-                       percentage
-                       format-backlight-status))
+                       'neutral percentage format))
         (make-status #f 'bad #f format-backlight-not-found))))
 
 (define (format-backlight-not-found status)

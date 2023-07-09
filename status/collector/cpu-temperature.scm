@@ -18,22 +18,22 @@
 (define-module (status collector cpu-temperature)
   #:use-module (status)
   #:use-module (ice-9 format)
-  #:export (cpu-temperature-status format-cpu-temperature-status))
+  #:export (cpu-temperature-status))
 
 (define (get-temperature file)
   (call-with-input-file file read))
 
 (define* (cpu-temperature-status
           #:optional (temperature-file "/sys/class/thermal/thermal_zone0/temp")
-          #:key (threshold 75))
+          #:key
+          (format format-cpu-temperature-status)
+          (threshold 75))
   (if (file-exists? temperature-file)
       (let* ((temp (get-temperature temperature-file))
              (celsius (round (/ temp 1000))))
-        (make-status
-         "🌡"
-         (if (> celsius threshold) 'bad 'neutral)
-         celsius
-         format-cpu-temperature-status))
+        (make-status "🌡"
+                     (if (> celsius threshold) 'bad 'neutral)
+                     celsius format))
       (make-status #f 'bad #f format-cpu-temperature-file-not-found)))
 
 (define (format-cpu-temperature-file-not-found status)

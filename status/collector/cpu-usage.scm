@@ -21,7 +21,7 @@
   #:use-module (ice-9 match)
   #:use-module (ice-9 textual-ports)
   #:use-module (srfi srfi-9)
-  #:export (cpu-usage-status format-cpu-usage-status))
+  #:export (cpu-usage-status))
 
 (define-record-type <cpu-usage>
   (make-cpu-usage user nice system idle total)
@@ -43,6 +43,7 @@
                        (+ user nice system idle))))))
 
 (define* (cpu-usage-status #:key
+                           (format format-cpu-usage-status)
                            (bad-threshold 95)
                            (degraded-threshold 90))
   (let* ((previous %cpu-usage)
@@ -58,8 +59,7 @@
      (cond ((> diff-usage bad-threshold) 'bad)
            ((> diff-usage degraded-threshold) 'degraded)
            (else 'neutral))
-     diff-usage
-     format-cpu-usage-status)))
+     diff-usage format)))
 
 (define (format-cpu-usage-status status)
   (format #f "~a ~2,'0d%"

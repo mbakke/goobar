@@ -21,7 +21,7 @@
   #:use-module (ice-9 match)
   #:use-module (ice-9 rdelim)
   #:use-module (srfi srfi-71)
-  #:export (battery-status format-battery-status))
+  #:export (battery-status))
 
 (define (battery-state->symbol state)
   (match state
@@ -80,6 +80,7 @@
      (else 0))))
 
 (define* (battery-status battery #:key
+                         (format format-battery-status)
                          (low-threshold 25)
                          (degraded-when-full? #t))
   (let ((status (get-battery-status battery)))
@@ -114,7 +115,7 @@
            `((energy-percent . ,energy-percent)
              (seconds-remaining . ,seconds-remaining)
              ,@status)
-           format-battery-status))
+           format))
         (make-status battery 'bad #f format-battery-not-found))))
 
 (define (format-battery-not-found status)

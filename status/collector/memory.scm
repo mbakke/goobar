@@ -20,7 +20,7 @@
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 format)
   #:use-module (ice-9 rdelim)
-  #:export (memory-status format-memory-status))
+  #:export (memory-status))
 
 (define (extract-numbers str)
   (string->number (last (string-tokenize str char-set:digit))))
@@ -48,7 +48,9 @@
               (loop (cons `(shared-memory . ,(extract-numbers line)) items)))
              (else (loop items))))))))
 
-(define* (memory-status #:key (low-threshold (* 512 1024)))
+(define* (memory-status #:key
+                        (format format-memory-status)
+                        (low-threshold (* 512 1024)))
   (let* ((status (get-memory-status))
          (memory-used (- (assoc-ref status 'memory-total)
                          (assoc-ref status 'memory-available))))
@@ -57,9 +59,8 @@
      "Mem:"
      (cond ((< (assoc-ref status 'memory-available) low-threshold) 'bad)
            (else 'neutral))
-     `((memory-used . ,memory-used)
-       ,@status)
-     format-memory-status)))
+     `((memory-used . ,memory-used) ,@status)
+     format)))
 
 ;; TODO: Better representation and defaults + calculate percentages.
 (define (format-memory-status status)

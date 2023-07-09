@@ -17,13 +17,13 @@
 
 (define-module (status collector ipv6)
   #:use-module (status)
-  #:export (ipv6-status format-ipv6-status))
+  #:export (ipv6-status))
 
-(define (ipv6-status)
+(define* (ipv6-status #:key (format format-ipv6-status))
   (with-exception-handler
       (lambda (err)
         ;; Probably no IPv6 connectivity.  Don't bother printing errors.
-        (make-status "IPv6" 'bad #f format-ipv6-status))
+        (make-status "IPv6" 'bad #f format))
     (lambda ()
       ;; Attempt to establish a connection to the K root DNS server.  Use
       ;; IP address to avoid DNS lookup.
@@ -40,7 +40,7 @@
         (connect sock (addrinfo:addr ai))
         (make-status "IPv6" 'good
                      (inet-ntop AF_INET6 (sockaddr:addr (getsockname sock)))
-                     format-ipv6-status)))
+                     format)))
     #:unwind? #t))
 
 (define (format-ipv6-status status)

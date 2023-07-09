@@ -22,7 +22,7 @@
   #:use-module (ice-9 match)
   #:use-module (ice-9 format)
   #:use-module (goobar external)
-  #:export (pulseaudio-status format-pulseaudio-status))
+  #:export (pulseaudio-status))
 
 ;; TODO: Can we do this without pactl..?
 (define (muted? sink)
@@ -45,7 +45,8 @@
            "???"))
       (_ "???"))))
 
-(define (pulseaudio-status sink)
+(define* (pulseaudio-status sink #:key
+                            (format format-pulseaudio-status))
   (let* ((mute? (muted? sink))
          (icon (if mute? "🔇" "🔊")))
     (make-status
@@ -53,7 +54,7 @@
      (if mute? 'degraded 'neutral)
      `((volume . ,(volume sink))
        (mute? . ,mute?))
-     format-pulseaudio-status)))
+     format)))
 
 (define (format-pulseaudio-status status)
   (let* ((icon (status-title status))

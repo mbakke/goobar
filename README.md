@@ -64,21 +64,22 @@ Example:
 
 (list (disk-status "/" #:degraded-threshold "80%")
       (disk-status "/home")
-      (let ((ipv6 (ipv6-status)))
-        ;; Don't bother printing the full IPv6 address.
-        (colorize (format #f "IPv6: ~a" (if (status-good? ipv6) "✔" "❌"))
-                  (status->color ipv6)))
-      (let* ((wifi-status (wifi-status "wlp0s20f3"))
-             (data (status-data wifi-status))
-             (color (status->color wifi-status)))
-        (if (status-bad? wifi-status)
-            (colorize (format-wifi-status wifi-status) color)
-            (colorize (format #f "~a ~a (~a%, ~a)"
-                              (status-title wifi-status)
-                              (assoc-ref data 'ssid)
-                              (assoc-ref data 'quality)
-                              (format-bitrate (assoc-ref data 'bitrate)))
-                      color)))
+      (ipv6-status
+       ;; Don't bother printing the full IPv6 address.
+       #:format (lambda (status)
+                  (if (status-good? status) "IPv6: ✔" "IPv6: ❌")))
+      (wifi-status
+       "wlp0s20f3"
+       #:format (lambda (status)
+                  (let ((icon (status-title status))
+                        (data (status-data status)))
+                    (if (status-bad? status)
+                        (format #f "~a down" icon)
+                        (format #f "~a ~a (~a%, ~a)"
+                                icon
+                                (assoc-ref data 'ssid)
+                                (assoc-ref data 'quality)
+                                (format-bitrate (assoc-ref data 'bitrate)))))))
       (battery-status "BAT0")
       (load-status '5min)
       (cpu-usage-status)

@@ -70,7 +70,7 @@
 (define (calculate-rate new old interval)
   (/ (- new old) interval))
 
-(define (network-rate-status interface)
+(define* (network-rate-status interface #:key (format format-network-rate))
   (let* ((now (current-time))
          (cached-timestamp (interface-cache-timestamp %interfaces))
          (cached-stats (interface-cache-interfaces %interfaces)))
@@ -101,7 +101,7 @@
                    interface 'neutral
                    `((rx-bytes/sec . ,(calculate-rate rx-bytes crx-bytes age))
                      (tx-bytes/sec . ,(calculate-rate tx-bytes ctx-bytes age)))
-                   format-network-rate)))
+                   format)))
               ;; Hmm, interface not in cache?  Probably does not exist.
               (make-status interface 'bad #f format-interface-not-found))))))
 
