@@ -84,7 +84,7 @@ Example:
       (cpu-usage-status)
       (pulseaudio-status "0")
       (magic-8-ball)
-      (format-time-status (time-status) "%d/%m %T"))
+      (time-status "%d/%m %T"))
 ```
 
 # Contributing

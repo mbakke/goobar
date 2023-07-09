@@ -19,15 +19,14 @@
   #:use-module (status)
   #:export (time-status format-time-status))
 
-(define* (time-status #:key (time-zone #f))
-  (let ((now (current-time)))
-    (make-status
-     "🕛"
-     'neutral
-     (if (string? time-zone)
-         (localtime now time-zone)
-         (localtime now))
-     format-time-status)))
+(define* (time-status #:optional (template "%F %T")
+                      #:key (time-zone #f))
+  (let* ((now (current-time))
+         (local (if (string? time-zone)
+                    (localtime now time-zone)
+                    (localtime now)))
+         (formatted (strftime template local)))
+    (make-status "🕛" 'neutral formatted format-time-status)))
 
-(define* (format-time-status status #:optional (format "%F %T"))
-  (strftime format (status-data status)))
+(define (format-time-status status)
+  (status-data status))
