@@ -20,26 +20,26 @@
   #:use-module (srfi srfi-9)
   #:use-module (ice-9 format)
   #:use-module (ice-9 match)
-  #:export (goobar-output-type
-            goobar-output-head
-            goobar-output-body
-            goobar-output-tail
-            goobar-output-foot
-            get-goobar-output))
+  #:export (output-type
+            output-head
+            output-body
+            output-tail
+            output-foot
+            get-output))
 
-(define-record-type <goobar-output>
-  (make-goobar-output type head body tail foot)
-  goobar-output?
+(define-record-type <output>
+  (make-output type head body tail foot)
+  output?
   ;; Symbol, currently either 'term or 'i3bar.
-  (type goobar-output-type)
+  (type output-type)
   ;; String printed at program startup.
-  (head goobar-output-head)
+  (head output-head)
   ;; Procedure to run every loop.
-  (body goobar-output-body)
+  (body output-body)
   ;; String printed before next loop (after sleeping).
-  (tail goobar-output-tail)
+  (tail output-tail)
   ;; String to print on exit.
-  (foot goobar-output-foot))
+  (foot output-foot))
 
 (define* (status-list->terminal-output status-list #:key (separator "|"))
   (format #t "~a~%"
@@ -51,13 +51,10 @@
   (let ((statusen (map (compose element->json status->element) status-list)))
     (format #t "[~a]~%" (string-join statusen ","))))
 
-(define (get-goobar-output output)
+(define (get-output output)
   (match output
     ('term
-     (make-goobar-output 'term #f status-list->terminal-output #f #f))
+     (make-output 'term #f status-list->terminal-output #f #f))
     ('i3bar
-     (make-goobar-output 'i3bar
-                         "{\"version\":1}\n[\n"
-                         status-list->json-output
-                         ","
-                         "]\n"))))
+     (make-output 'i3bar "{\"version\":1}\n[\n"
+                  status-list->json-output "," "]\n"))))
