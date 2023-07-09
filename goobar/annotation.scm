@@ -46,7 +46,7 @@
                    (min-width #f)
                    (align #f)
                    (urgent? #f)
-                   (separator? #f)
+                   (separator? #t)
                    (block-width #f)
                    (markup #f))
   (make-element name instance full-text short-text color background
