@@ -21,6 +21,7 @@
   #:use-module (ice-9 format)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
+  #:use-module (srfi srfi-19)
   #:use-module (status)
   #:export (network-rate-status format-bytes))
 
@@ -32,8 +33,8 @@
 
 ;; This variable holds the statistics of all interfaces.  Use a timestamp
 ;; to prevent updating multiple times in the same second.
-;; (XXX: the timestamp is in seconds, and thus not very accurate for
-;; short intervals.  Consider using microseconds for higher precision..!)
+;; TODO: It would be cleaner to pass the result of the previous run as
+;; argument to the status collector somehow..!
 (define %interfaces (make-interface-cache 0 '()))
 
 (define-record-type <interface-statistics>
@@ -68,13 +69,13 @@
                                           stats))))))))))))))
 
 (define (calculate-rate new old interval)
-  (/ (- new old) interval))
+  (* 1e9 (/ (- new old) interval)))
 
 (define* (network-rate-status interface #:key (format format-network-rate))
-  (let* ((now (current-time))
+  (let* ((now (current-time 'time-monotonic))
          (cached-timestamp (interface-cache-timestamp %interfaces))
          (cached-stats (interface-cache-interfaces %interfaces)))
-    (if (= 0 cached-timestamp)
+    (if (and (integer? cached-timestamp) (= 0 cached-timestamp))
         ;; First run..!
         (begin
           (set! %interfaces (make-interface-cache now (get-network-statistics)))
@@ -82,8 +83,10 @@
         (let ((cached-if (assoc-ref cached-stats interface))
               (current-stats (get-network-statistics)))
           (if cached-if
-              (let ((current-if (assoc-ref current-stats interface))
-                    (age (- now cached-timestamp)))
+              (let* ((current-if (assoc-ref current-stats interface))
+                     (age (time-difference now cached-timestamp))
+                     (ns (+ (* 1e9 (time-second age))
+                            (time-nanosecond age))))
                 ;; We could assert that the pairs are indeed (bytes N),
                 ;; (packets N), etc, but it is probably safe to assume that
                 ;; this format does not change much.
@@ -99,8 +102,8 @@
                   (set! %interfaces (make-interface-cache now current-stats))
                   (make-status
                    interface 'neutral
-                   `((rx-bytes/sec . ,(calculate-rate rx-bytes crx-bytes age))
-                     (tx-bytes/sec . ,(calculate-rate tx-bytes ctx-bytes age)))
+                   `((rx-bytes/sec . ,(calculate-rate rx-bytes crx-bytes ns))
+                     (tx-bytes/sec . ,(calculate-rate tx-bytes ctx-bytes ns)))
                    format)))
               ;; Hmm, interface not in cache?  Probably does not exist.
               (make-status interface 'bad #f format-interface-not-found))))))
