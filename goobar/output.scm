@@ -44,10 +44,17 @@
   (foot output-foot))
 
 (define* (status-list->terminal-output status-list #:key (separator " | "))
-  (format #t "~a~%"
-          (string-join (map (compose element->text status->element)
-                            status-list)
-                       (ansi-paint separator "#646464"))))
+  (let ((colored-separator (ansi-paint separator "#646464")))
+    (match (map status->element status-list)
+      ((elements ... last)
+       (for-each (lambda (element)
+                   (format #t "~a~a"
+                           (element->text element)
+                           (if (element-separator? element)
+                               colored-separator
+                               " ")))
+                 elements)
+       (format #t "~a~%" (element->text last))))))
 
 (define (status-list->json-output status-list)
   (let ((statusen (map (compose element->json status->element) status-list)))
