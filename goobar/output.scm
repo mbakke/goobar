@@ -19,6 +19,7 @@
   #:use-module (goobar output element)
   #:use-module (goobar annotation)
   #:use-module (goobar colors)
+  #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
   #:use-module (ice-9 format)
   #:use-module (ice-9 match)
@@ -54,7 +55,9 @@
                                colored-separator
                                " ")))
                  elements)
-       (format #t "~a~%" (element->text last))))))
+       (format #t "~a~%" (element->text last))
+       (when (any element-urgent? (cons last elements))
+         (format #t "\a"))))))
 
 (define (status-list->json-output status-list)
   (let ((statusen (map (compose element->json status->element) status-list)))
