@@ -17,7 +17,7 @@
 
 (define-module (goobar colors)
   #:use-module (ice-9 match)
-  #:export (state->color hex->ansi-truecolor))
+  #:export (state->color ansi-paint))
 
 (define (state->color state)
   (match state
@@ -26,7 +26,7 @@
     ('bad "#FF0000")
     (_ #f)))
 
-(define (hex->ansi-truecolor color)
+(define (ansi-paint str color)
   ;; TODO: How widely supported is this?  We probably don't need the
   ;; full 24-bit color range for terminals.  Maybe round it down to the
   ;; nearest 256 color palette like i3status or tmux (I just could not
@@ -35,4 +35,6 @@
         (g (string->number (substring color 3 5) 16))
         (b (string->number (substring color 5 7) 16)))
     (string-append (string #\esc #\[)
-                   (format #f "38;2;~d;~d;~dm" r g b))))
+                   (format #f "38;2;~d;~d;~dm" r g b)
+                   str
+                   (string #\esc #\[) "0m")))

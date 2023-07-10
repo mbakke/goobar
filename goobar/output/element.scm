@@ -40,7 +40,7 @@
             element-block-width
             element-markup
 
-            element->ansi-colored-string
+            element->text
             element->json))
 
 ;; This is essentially the same fields as specified by swaybar-protocol(7).
@@ -67,13 +67,11 @@
   (block-width element-separator-block-width)
   (markup element-markup))
 
-(define (element->ansi-colored-string element)
+(define (element->text element)
   (let ((color (element-color element))
         (text (element-full-text element)))
     (if color
-        (string-append (hex->ansi-truecolor color)
-                       text
-                       (string #\esc #\[) "0m")
+        (ansi-paint text color)
         text)))
 
 (define (element->json element)

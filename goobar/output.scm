@@ -18,6 +18,7 @@
 (define-module (goobar output)
   #:use-module (goobar output element)
   #:use-module (goobar annotation)
+  #:use-module (goobar colors)
   #:use-module (srfi srfi-9)
   #:use-module (ice-9 format)
   #:use-module (ice-9 match)
@@ -42,11 +43,11 @@
   ;; String to print on exit.
   (foot output-foot))
 
-(define* (status-list->terminal-output status-list #:key (separator "|"))
+(define* (status-list->terminal-output status-list #:key (separator " | "))
   (format #t "~a~%"
-          (string-join (map (compose element->ansi-colored-string status->element)
+          (string-join (map (compose element->text status->element)
                             status-list)
-                       separator)))
+                       (ansi-paint separator "#646464"))))
 
 (define (status-list->json-output status-list)
   (let ((statusen (map (compose element->json status->element) status-list)))
