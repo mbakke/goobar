@@ -35,7 +35,12 @@
                       (quality-threshold 50))
   (with-exception-handler
       (lambda (err)
-        (make-status "📶" 'bad err format-wifi-status-exception))
+        (cond ((eq? 'no-such-device (exception-kind err))
+               ;; Catch "device not found" exception from Guile-Netlink, but let
+               ;; other exceptions through.
+               (make-status "📶" 'bad interface
+                            format-wifi-status-interface-not-found))
+              (else (raise-exception err))))
     (lambda ()
       (let* ((bss (nl80211-bss-info interface))
              (status (assoc-ref bss 'status))
@@ -71,12 +76,6 @@
          format)))
     #:unwind? #t))
 
-(define (format-wifi-status-exception status)
-  (let ((err (status-data status)))
-    (format #f "~a: ~a"
-            (exception-irritants err)
-            (exception-kind err))))
-
 (define (format-signal signal)
   (if signal
       (if (positive? signal)
@@ -104,3 +103,6 @@
                 (format-signal quality)
                 ssid
                 (format #f "~@[ ~a~]" (assoc-ref data 'ip))))))
+
+(define (format-wifi-status-interface-not-found status)
+  (format #f "~a not found" (status-data status)))

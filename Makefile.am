@@ -68,7 +68,8 @@ SOURCES = \
 TESTS = \
 	tests/goobar/test-config.sh \
 	tests/goobar/test-output.sh \
-	tests/status/battery.scm
+	tests/status/battery.scm \
+	tests/status/wifi.scm
 
 TEST_EXTENSIONS = .scm .sh
 
