@@ -33,8 +33,10 @@
     (_ (symbol->string state))))
 
 (define (get-battery-status battery)
-  (let ((status-file (string-append "/sys/class/power_supply/"
-                                          battery "/uevent")))
+  (let ((status-file (if (string-prefix? "/" battery)
+                         battery
+                         (string-append "/sys/class/power_supply/"
+                                        battery "/uevent"))))
     (if (file-exists? status-file)
         (let ((uevent (open-file status-file "r")))
           (let loop ((items '()))
