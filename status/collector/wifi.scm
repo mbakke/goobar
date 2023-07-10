@@ -32,7 +32,7 @@
 
 (define* (wifi-status interface #:key
                       (format format-wifi-status)
-                      (quality-treshold 50))
+                      (quality-threshold 50))
   (with-exception-handler
       (lambda (err)
         (make-status "📶" 'bad err format-wifi-status-exception))
@@ -55,7 +55,7 @@
         (make-status
          "📶"
          (if (and connected? ssid)
-             (if (and ip (> quality quality-treshold))
+             (if (and ip (> quality quality-threshold))
                  'good
                  'degraded)
              'bad)
