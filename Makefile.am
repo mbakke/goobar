@@ -65,11 +65,15 @@ SOURCES = \
 	goobar/output.scm \
 	goobar.scm
 
-TEST_EXTENSIONS = .sh
-
 TESTS = \
 	tests/goobar/test-config.sh \
-	tests/goobar/test-output.sh
+	tests/goobar/test-output.sh \
+	tests/status/battery.scm
+
+TEST_EXTENSIONS = .scm .sh
+
+SCM_LOG_COMPILER = $(top_builddir)/test-env $(GUILE)
+AM_SCM_LOG_FLAGS = --no-auto-compile -L "$(top_srcdir)"
 
 SH_LOG_COMPILER = $(top_builddir)/test-env $(SHELL)
 AM_SH_LOG_FLAGS = -x -e
