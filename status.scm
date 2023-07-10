@@ -24,6 +24,7 @@
             status-good?
             status-degraded?
             status-bad?
+            status-critical?
             status-neutral?))
 
 ;; TODO: Support default values and inheritance à la (guix records)?
@@ -31,7 +32,7 @@
   (make-status title state data printer)
   status?
   (title status-title)                  ;<string> (often emoji..)
-  (state status-state)                  ;'good|'degraded|'bad|'neutral
+  (state status-state)                  ;symbol
   (data status-data)                    ;any data type
   (printer status-printer))             ;procedure
 
@@ -46,6 +47,9 @@
 
 (define (status-bad? status)
   (eq? 'bad (status-state status)))
+
+(define (status-critical? status)
+  (eq? 'critical (status-state status)))
 
 (define (status-neutral? status)
   (eq? 'neutral (status-state status)))

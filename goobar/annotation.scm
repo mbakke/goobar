@@ -45,7 +45,9 @@
                    (border-right #f)
                    (min-width #f)
                    (align #f)
-                   (urgent? #f)
+                   (urgent? (match obj
+                              ((? status?) (status-critical? obj))
+                              (_ #f)))
                    (separator? #t)
                    (block-width #f)
                    (markup #f))
