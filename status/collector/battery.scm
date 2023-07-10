@@ -82,6 +82,7 @@
 (define* (battery-status battery #:key
                          (format format-battery-status)
                          (low-threshold 25)
+                         (critical-threshold 10)
                          (degraded-when-full? #t))
   (let ((status (get-battery-status battery)))
     (if status
@@ -102,16 +103,21 @@
              ('full "🔋☻")
              ('not-charging "🔌")
              (_  "?"))
-           (cond
-            ((and (eq? 'discharging state)
-                  (< seconds-remaining 1800)
-                  ;; Prevent bad status when just disconnected but seconds-remaining
-                  ;; has not been calculated yet.
-                  (< energy-percent 50))
-             'bad)
-            ((and (eq? 'discharging state) (< energy-percent low-threshold)) 'degraded)
-            ((and (eq? 'full state) degraded-when-full?) 'degraded)
-            (else 'neutral))
+           (match state
+             ('discharging
+              (cond ((and (< seconds-remaining 600)
+                          ;; Prevent bad status when just disconnected but
+                          ;; seconds-remaining has not been calculated yet.
+                          (> seconds-remaining 0))
+                     'critical)
+                    ((and (< seconds-remaining 1800)
+                          (> seconds-remaining 0))
+                     'bad)
+                    ((< energy-percent critical-threshold) 'critical)
+                    ((< energy-percent low-threshold) 'degraded)
+                    (else 'neutral)))
+             ('full (if degraded-when-full? 'degraded 'neutral))
+             (_ 'neutral))
            `((energy-percent . ,energy-percent)
              (seconds-remaining . ,seconds-remaining)
              ,@status)
