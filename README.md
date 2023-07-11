@@ -93,7 +93,8 @@ Example:
                                     (down (assoc-ref data 'rx-bytes/sec)))
                                (format #f "⬇ ~a" (format-bytes down)))))
       (battery-status "BAT0")
-      (load-status '5min)
+      ;; Remove silly load icon.
+      (annotate (load-status '5min) #:icon #f)
       (cpu-usage-status)
       (pulseaudio-status "0")
       (backlight-status)
