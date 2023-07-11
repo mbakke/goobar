@@ -43,7 +43,6 @@ when returning from PROC.  SPEC should be a list of pairs such as:
       (const #t)
       (lambda ()
         (for-each (lambda (arg)
-                    (pk arg)
                     (format tmp-port "POWER_SUPPLY_~a=~a~%"
                             (car arg) (cdr arg)))
                   spec)
