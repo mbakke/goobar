@@ -58,6 +58,17 @@ when returning from PROC.  SPEC should be a list of pairs such as:
   "no-such-battery <not found>"
   (status->string (battery-status "no-such-battery")))
 
+(test-eq "unknown status"
+  'unknown!
+  (call-with-temporary-battery-status-file
+   '((STATUS . "unknown!")
+     (ENERGY_FULL . 100)
+     (ENERGY_NOW  . 100)
+     (POWER_NOW   . 10))
+   (lambda (file)
+     (assoc-ref (status-data (battery-status file))
+                'status))))
+
 (test-equal "battery time remaining, charging, no power"
   0
   (call-with-temporary-battery-status-file

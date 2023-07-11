@@ -30,7 +30,7 @@
     ("Not charging" 'not-charging)
     ("Full" 'full)
     ;; TODO: What other states exist..?
-    (_ (symbol->string state))))
+    (_ (string->symbol state))))
 
 (define (get-battery-status battery)
   (let ((status-file (if (string-prefix? "/" battery)
