@@ -25,6 +25,18 @@
   "#00FF00"
   (state->color 'good))
 
+(test-equal "state->color, critical, first invocation"
+  "#8B0000"
+  (state->color 'critical))
+
+(test-equal "state->color, critical, second invocation"
+  "#FFA000"
+  (state->color 'critical))
+
+(test-equal "state->color, critical, third invocation"
+  "#8B0000"
+  (state->color 'critical))
+
 (test-assert "validate color, valid color"
   (validate-color "#000000"))
 

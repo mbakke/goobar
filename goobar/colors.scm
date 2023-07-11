@@ -20,11 +20,22 @@
   #:use-module (ice-9 match)
   #:export (state->color ansi-paint validate-color))
 
+(define %critical-color-bit 0)
+(define (critical-color)
+  (if (zero? %critical-color-bit)
+      (begin
+        (set! %critical-color-bit 1)
+        "#8B0000")
+      (begin
+        (set! %critical-color-bit 0)
+        "#FFA000")))
+
 (define (state->color state)
   (match state
     ('good "#00FF00")
     ('degraded "#FFD000")
     ('bad "#FF0000")
+    ('critical (critical-color))
     (_ #f)))
 
 (define (ansi-paint str color)
