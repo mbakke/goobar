@@ -50,6 +50,7 @@ Example:
 
 ```
 (use-modules (status)
+             (status collector backlight)
              (status collector battery)
              (status collector cpu-usage)
              (status collector disk)
@@ -95,6 +96,7 @@ Example:
       (load-status '5min)
       (cpu-usage-status)
       (pulseaudio-status "0")
+      (backlight-status)
       (annotate (format #f "Hi ~a!" (getenv "USER")) #:color (random-color))
       (time-status "%d/%m %T"))
 ```
