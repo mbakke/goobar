@@ -16,6 +16,7 @@
 ;;; along with Goobar. If not, see <https://www.gnu.org/licenses/>.
 
 (define-module (goobar colors)
+  #:use-module (ice-9 format)
   #:use-module (ice-9 match)
   #:export (state->color ansi-paint validate-color))
 
