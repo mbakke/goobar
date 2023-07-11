@@ -58,7 +58,9 @@
                 (if icon
                     (string-append icon " " full-text)
                     full-text)
-                short-text color background
+                short-text
+                (validate-color color)
+                background
                 border border-top border-bottom border-left border-right
                 min-width align urgent? separator? block-width markup))
 

@@ -67,6 +67,7 @@ SOURCES = \
 
 TESTS = \
 	tests/goobar/annotation.scm	\
+	tests/goobar/colors.scm		\
 	tests/goobar/test-config.sh	\
 	tests/goobar/test-output.sh	\
 	tests/status/battery.scm	\

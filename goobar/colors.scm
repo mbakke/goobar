@@ -17,7 +17,7 @@
 
 (define-module (goobar colors)
   #:use-module (ice-9 match)
-  #:export (state->color ansi-paint))
+  #:export (state->color ansi-paint validate-color))
 
 (define (state->color state)
   (match state
@@ -38,3 +38,11 @@
                    (format #f "38;2;~d;~d;~dm" r g b)
                    str
                    (string #\esc #\[) "0m")))
+
+(define (validate-color color)
+  "Check if COLOR is valid, and return either COLOR, or #f when invalid."
+  (and (string? color)
+       (string-prefix? "#" color)
+       (= 7 (string-length color))
+       (string-every char-set:hex-digit (string-drop color 1))
+       color))
