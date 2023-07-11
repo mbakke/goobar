@@ -119,10 +119,10 @@
              (seconds-remaining . ,seconds-remaining)
              ,@status)
            format))
-        (make-status 'battery 'bad #f format-battery-not-found))))
+        (make-status 'battery 'bad battery format-battery-not-found))))
 
 (define (format-battery-not-found status)
-  "<not found>")
+  (format #f "~a <not found>" (status-data status)))
 
 (define (format-battery-status status)
   (let* ((data (status-data status))
