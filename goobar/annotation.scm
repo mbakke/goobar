@@ -84,7 +84,8 @@
            ('charging "⚡")
            ('full "🔋☻")
            ('not-charging "🔌")
-           (_  "BAT"))))
+           ;; This should not happen.  Notify the user that something is off.
+           (_  "🦇"))))
       ('cpu-usage "🔥")
       ('cpu-temperature "🌡")
       ('disk "🖴")

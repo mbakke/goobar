@@ -49,6 +49,15 @@
                                        (const ""))))
                1))
 
+(test-equal "battery icon, unknown status"
+  "🦇"
+  (string-take (element-full-text
+                (annotate (make-status 'battery
+                                       'neutral
+                                       '((status . foo))
+                                       (const ""))))
+               1))
+
 (test-equal "pulseaudio icon"
   "🔊"
   (string-take (element-full-text
