@@ -55,13 +55,11 @@
          (diff-usage (round (* 100 (- 1 (/ diff-idle diff-total))))))
     (set! %cpu-usage current)
     (make-status
-     "🔥"
+     'cpu-usage
      (cond ((> diff-usage bad-threshold) 'bad)
            ((> diff-usage degraded-threshold) 'degraded)
            (else 'neutral))
      diff-usage format)))
 
 (define (format-cpu-usage-status status)
-  (format #f "~a ~2,'0d%"
-          (status-title status)
-          (status-data status)))
+  (format #f "~2,'0d%" (status-data status)))

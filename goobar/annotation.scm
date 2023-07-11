@@ -24,8 +24,11 @@
 
 (define* (annotate obj
                    #:key
+                   (icon (match obj
+                           ((? status?) (status->icon obj))
+                           (_ #f)))
                    (name (match obj
-                           ((? status?) (status-title obj))
+                           ((? status?) (symbol->string (status-title obj)))
                            (_ #f)))
                    (instance #f)
                    (full-text (match obj
@@ -51,7 +54,11 @@
                    (separator? #t)
                    (block-width #f)
                    (markup #f))
-  (make-element name instance full-text short-text color background
+  (make-element name instance
+                (if icon
+                    (string-append icon " " full-text)
+                    full-text)
+                short-text color background
                 border border-top border-bottom border-left border-right
                 min-width align urgent? separator? block-width markup))
 
@@ -62,3 +69,34 @@
     ((? element?) status)
     (_ (annotate (format #f "can not process ~a" status)
                  #:color (state->color 'bad)))))
+
+(define (status->icon status)
+  (let ((name (status-title status)))
+    (match name
+      ('backlight
+       (match (status-data status)
+         ((? integer? num) (if (> num 50)  "🔆" "🔅"))
+         (_ #f)))
+      ('battery
+       (let ((data (status-data status)))
+         (match (assoc-ref data 'status)
+           ('discharging "🔋")
+           ('charging "⚡")
+           ('full "🔋☻")
+           ('not-charging "🔌")
+           (_  "BAT"))))
+      ('cpu-usage "🔥")
+      ('cpu-temperature "🌡")
+      ('disk "🖴")
+      ;; Why no RJ45 connector in Unicode spec :(
+      ('ethernet "E:")
+      ('ipv6 "IPv6")
+      ('load "🏋")
+      ;; Why no IC icon in Unicode?  🐏 or 🍪 is probably too abstract...
+      ('memory "M:")
+      ('pulseaudio
+       (let ((data (status-data status)))
+         (if (assoc-ref data 'mute?)
+             "🔇" "🔊")))
+      ('wifi "📶")
+      (_ #f))))

@@ -23,7 +23,7 @@
   (with-exception-handler
       (lambda (err)
         ;; Probably no IPv6 connectivity.  Don't bother printing errors.
-        (make-status "IPv6" 'bad #f format))
+        (make-status 'ipv6 'bad #f format))
     (lambda ()
       ;; Attempt to establish a connection to the K root DNS server.  Use
       ;; IP address to avoid DNS lookup.
@@ -38,12 +38,11 @@
              (sock (socket (addrinfo:fam ai) (addrinfo:socktype ai)
                            (addrinfo:protocol ai))))
         (connect sock (addrinfo:addr ai))
-        (make-status "IPv6" 'good
+        (make-status 'ipv6 'good
                      (inet-ntop AF_INET6 (sockaddr:addr (getsockname sock)))
                      format)))
     #:unwind? #t))
 
 (define (format-ipv6-status status)
-  (format #f "~a: ~a"
-          (status-title status)
+  (format #f "~a"
           (if (status-good? status) (status-data status) "❌")))

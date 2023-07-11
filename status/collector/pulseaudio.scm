@@ -47,20 +47,18 @@
 
 (define* (pulseaudio-status sink #:key
                             (format format-pulseaudio-status))
-  (let* ((mute? (muted? sink))
-         (icon (if mute? "🔇" "🔊")))
+  (let ((mute? (muted? sink)))
     (make-status
-     icon
+     'pulseaudio
      (if mute? 'degraded 'neutral)
      `((volume . ,(volume sink))
        (mute? . ,mute?))
      format)))
 
 (define (format-pulseaudio-status status)
-  (let* ((icon (status-title status))
-         (data (status-data status))
+  (let* ((data (status-data status))
          (mute? (assoc-ref data 'mute?))
          (volume (assoc-ref data 'volume)))
     (if mute?
-        (format #f "~a (~a)" icon (string-trim-both volume))
-        (format #f "~a ~a" icon (string-trim-both volume)))))
+        (format #f "(~a)" (string-trim-both volume))
+        (format #f "~a" (string-trim-both volume)))))

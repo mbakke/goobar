@@ -97,16 +97,18 @@
                   ;; Update the cache.
                   (set! %interfaces (make-interface-cache now current-stats))
                   (make-status
-                   interface 'neutral
+                   ;; TODO: Pass on interface as "instance".
+                   'network-rate 'neutral
                    `((rx-bytes/sec . ,(calculate-rate rx-bytes crx-bytes ns))
                      (tx-bytes/sec . ,(calculate-rate tx-bytes ctx-bytes ns)))
                    format)))
               ;; Hmm, interface not in cache?  Probably does not exist.
-              (make-status interface 'bad #f format-interface-not-found)))
+              (make-status 'network-rate 'bad interface
+                           format-interface-not-found)))
         (begin
           ;; First run..!
           (set! %interfaces (make-interface-cache now (get-network-statistics)))
-          (make-status interface 'degraded #f format-no-data)))))
+          (make-status 'network-rate 'degraded interface format-no-data)))))
 
 (define (format-bytes bytes)
   ;; XXX: Consider using a consistent output length to avoid resizing.
@@ -120,10 +122,10 @@
         (else (format #f "~1,2f B" bytes))))
 
 (define (format-interface-not-found status)
-  (format #f "~a not found" (status-title status)))
+  (format #f "~a not found" (status-data status)))
 
 (define (format-no-data status)
-  (format #f "~a: <no data>" (status-title status)))
+  (format #f "~a: <no data>" (status-data status)))
 
 (define (format-network-rate status)
   (let ((data (status-data status)))

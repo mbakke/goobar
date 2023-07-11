@@ -30,12 +30,11 @@
         (let* ((brightness (read-backlight-file path "brightness"))
                (max (read-backlight-file path "max_brightness"))
                (percentage (round (* 100 (/ brightness max)))))
-          (make-status (if (>= percentage 50) "🔆" "🔅")
-                       'neutral percentage format))
-        (make-status #f 'bad #f format-backlight-not-found))))
+          (make-status 'backlight 'neutral percentage format))
+        (make-status 'backlight 'bad #f format-backlight-not-found))))
 
 (define (format-backlight-not-found status)
   "<no backlight>")
 
 (define (format-backlight-status status)
-  (format #f "~a ~d%" (status-title status) (status-data status)))
+  (format #f "~d%" (status-data status)))

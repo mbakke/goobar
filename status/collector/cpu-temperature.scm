@@ -31,15 +31,14 @@
   (if (file-exists? temperature-file)
       (let* ((temp (get-temperature temperature-file))
              (celsius (round (/ temp 1000))))
-        (make-status "🌡"
+        (make-status 'cpu-temperature
                      (if (> celsius threshold) 'bad 'neutral)
                      celsius format))
-      (make-status #f 'bad #f format-cpu-temperature-file-not-found)))
+      (make-status 'cpu-temperature 'bad #f
+                   format-cpu-temperature-file-not-found)))
 
 (define (format-cpu-temperature-file-not-found status)
   "<can't read temp>")
 
 (define (format-cpu-temperature-status status)
-  (format #f "~a ~d°C"
-          (status-title status)
-          (status-data status)))
+  (format #f "~d°C" (status-data status)))

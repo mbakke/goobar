@@ -55,7 +55,7 @@ when returning from PROC.  SPEC should be a list of pairs such as:
 (test-begin "battery")
 
 (test-equal "battery not found"
-  "no-such-battery <not found>"
+  "<not found>"
   (status->string (battery-status "no-such-battery")))
 
 (test-equal "battery time remaining, charging, no power"

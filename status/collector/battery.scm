@@ -99,12 +99,7 @@
                                             (assoc-ref status 'energy-full)))))
               (state (assoc-ref status 'status)))
           (make-status
-           (match state
-             ('discharging "🔋")
-             ('charging "⚡")
-             ('full "🔋☻")
-             ('not-charging "🔌")
-             (_  "?"))
+           'battery
            (match state
              ('discharging
               (cond ((and (< seconds-remaining 600)
@@ -124,10 +119,10 @@
              (seconds-remaining . ,seconds-remaining)
              ,@status)
            format))
-        (make-status battery 'bad #f format-battery-not-found))))
+        (make-status 'battery 'bad #f format-battery-not-found))))
 
 (define (format-battery-not-found status)
-  (format #f "~a <not found>" (status-title status)))
+  "<not found>")
 
 (define (format-battery-status status)
   (let* ((data (status-data status))
@@ -137,7 +132,6 @@
          (time-remaining (if (or (= 0 seconds) (= 0 minutes))
                              ""
                              (format #f " ~2,'0d:~2,'0d" hours minutes))))
-    (format #f "~a ~,2f%~a"
-            (status-title status)
+    (format #f "~,2f%~a"
             (assoc-ref data 'energy-percent)
             time-remaining)))

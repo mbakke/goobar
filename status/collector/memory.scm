@@ -55,8 +55,7 @@
          (memory-used (- (assoc-ref status 'memory-total)
                          (assoc-ref status 'memory-available))))
     (make-status
-     ;; TODO: Icon (🐏 is probably too abstract..).
-     "Mem:"
+     'memory
      (cond ((< (assoc-ref status 'memory-available) low-threshold) 'bad)
            (else 'neutral))
      `((memory-used . ,memory-used) ,@status)

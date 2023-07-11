@@ -38,7 +38,7 @@
         (cond ((eq? 'no-such-device (exception-kind err))
                ;; Catch "device not found" exception from Guile-Netlink, but let
                ;; other exceptions through.
-               (make-status "📶" 'bad interface
+               (make-status 'wifi 'bad interface
                             format-wifi-status-interface-not-found))
               (else (raise-exception err))))
     (lambda ()
@@ -58,7 +58,7 @@
              ;; IP address, which is what users want in most cases.
              (ip (find routable? ipv4)))
         (make-status
-         "📶"
+         'wifi
          (if (and connected? ssid)
              (if (and ip (> quality quality-threshold))
                  'good
@@ -91,15 +91,13 @@
 
 (define (format-wifi-status status)
   (let* ((data (status-data status))
-         (icon (status-title status))
          (connected? (assoc-ref data 'connected?))
          (bitrate (assoc-ref data 'bitrate))
          (quality (assoc-ref data 'quality))
          (ssid (assoc-ref data 'ssid)))
     (if (status-bad? status)
-        (format #f "~a down" icon)
-        (format #f "~a (~a at ~a)~a)"
-                icon
+        (format #f "down")
+        (format #f "(~a at ~a)~a)"
                 (format-signal quality)
                 ssid
                 (format #f "~@[ ~a~]" (assoc-ref data 'ip))))))

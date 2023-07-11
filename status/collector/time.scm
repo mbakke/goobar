@@ -28,7 +28,7 @@
                     (localtime now time-zone)
                     (localtime now)))
          (formatted (strftime template local)))
-    (make-status "🕛" 'neutral formatted format)))
+    (make-status 'time 'neutral formatted format)))
 
 (define (format-time-status status)
   (status-data status))

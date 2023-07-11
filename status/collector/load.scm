@@ -37,9 +37,9 @@
      (let* ((data `((1min . ,1m) (5min . ,5m) (15min . ,15m)))
             (load (string->number (assoc-ref data period))))
        (make-status
-        "🏋"
+        'load
         (if (> load threshold) 'bad 'neutral)
         load format)))))
 
 (define* (format-load-status status)
-  (format #f "~a ~,2f" (status-title status) (status-data status)))
+  (format #f "~,2f" (status-data status)))

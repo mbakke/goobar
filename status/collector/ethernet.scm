@@ -33,7 +33,7 @@
          ;; IP address, which is what users want in most cases.
          (ip (find routable? ipv4)))
     (make-status
-     "E:"
+     'ethernet
      (if carrier? (if ip 'good 'degraded) 'bad)
      `((interface . ,interface)
        (carrier? . ,carrier?)
@@ -44,12 +44,10 @@
      format)))
 
 (define (format-ethernet-status status)
-  (let* ((icon (status-title status))
-         (data (status-data status))
+  (let* ((data (status-data status))
          (carrier? (assq-ref data 'carrier?)))
     (if carrier?
-        (format #f "~a ~a~a"
-                icon
+        (format #f "~a~a"
                 (or (assoc-ref data 'ip) "up")
                 (format #f "~@[ (~d Mbit/s)~]" (assoc-ref data 'speed)))
-        (format #f "~a down" icon))))
+        "down")))

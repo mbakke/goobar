@@ -62,7 +62,7 @@
            ;; TODO: Implement K/M/G/T conversion and thresholds.
            (let ((percent-used (ceiling (* 100 (/ used total)))))
              (make-status
-              "🖴"
+              'disk
               (cond ((> percent-used bad) 'bad)
                     ((> percent-used degraded) 'degraded)
                     (else 'neutral))
@@ -72,13 +72,11 @@
                 (available . ,(ceiling (/ avail 1024 1024 1024)))
                 (percent-used . ,percent-used))
               format)))))
-      (make-status "🖴" 'bad mount-point format-mount-point-not-found)))
+      (make-status 'disk 'bad mount-point format-mount-point-not-found)))
 
 (define (format-mount-point-not-found status)
   (format #f "~a: not found" (status-data status)))
 
 (define (format-disk-status status)
   (let ((data (status-data status)))
-    (format #f "~a ~d%"
-            (status-title status)
-            (assoc-ref data 'percent-used))))
+    (format #f "~d%" (assoc-ref data 'percent-used))))

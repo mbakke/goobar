@@ -71,17 +71,15 @@ Example:
       (ipv6-status
        ;; Don't bother printing the full IPv6 address.
        #:format (lambda (status)
-                  (if (status-good? status) "IPv6: ✔" "IPv6: ❌")))
+                  (if (status-good? status) "✔" "❌")))
       (annotate
        (wifi-status "wlp0s20f3"
                     #:format
                     (lambda (status)
-                      (let ((icon (status-title status))
-                            (data (status-data status)))
+                      (let ((data (status-data status)))
                         (if (status-bad? status)
-                            (format #f "~a down" icon)
-                            (format #f "~a ~a (~a%, ~a)"
-                                    icon
+                            "down"
+                            (format #f "~a (~d%, ~a)"
                                     (assoc-ref data 'ssid)
                                     (assoc-ref data 'quality)
                                     (format-bitrate (assoc-ref data 'bitrate)))))))
@@ -92,7 +90,7 @@ Example:
                            (lambda (status)
                              (let* ((data (status-data status))
                                     (down (assoc-ref data 'rx-bytes/sec)))
-                               (format-bytes down))))
+                               (format #f "⬇ ~a" (format-bytes down)))))
       (battery-status "BAT0")
       (load-status '5min)
       (cpu-usage-status)
