@@ -66,10 +66,11 @@ SOURCES = \
 	goobar.scm
 
 TESTS = \
-	tests/goobar/test-config.sh \
-	tests/goobar/test-output.sh \
-	tests/status/battery.scm \
-	tests/status/network-rate.scm \
+	tests/goobar/annotation.scm	\
+	tests/goobar/test-config.sh	\
+	tests/goobar/test-output.sh	\
+	tests/status/battery.scm	\
+	tests/status/network-rate.scm	\
 	tests/status/wifi.scm
 
 TEST_EXTENSIONS = .scm .sh
