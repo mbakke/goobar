@@ -35,7 +35,7 @@
 ;; to prevent updating multiple times in the same second.
 ;; TODO: It would be cleaner to pass the result of the previous run as
 ;; argument to the status collector somehow..!
-(define %interfaces (make-interface-cache 0 '()))
+(define %interfaces (make-interface-cache #f '()))
 
 (define-record-type <interface-statistics>
   (make-interface-statistics receive transmit)
@@ -75,11 +75,7 @@
   (let* ((now (current-time 'time-monotonic))
          (cached-timestamp (interface-cache-timestamp %interfaces))
          (cached-stats (interface-cache-interfaces %interfaces)))
-    (if (and (integer? cached-timestamp) (= 0 cached-timestamp))
-        ;; First run..!
-        (begin
-          (set! %interfaces (make-interface-cache now (get-network-statistics)))
-          (make-status interface 'degraded #f format-no-data))
+    (if cached-timestamp
         (let ((cached-if (assoc-ref cached-stats interface))
               (current-stats (get-network-statistics)))
           (if cached-if
@@ -106,7 +102,11 @@
                      (tx-bytes/sec . ,(calculate-rate tx-bytes ctx-bytes ns)))
                    format)))
               ;; Hmm, interface not in cache?  Probably does not exist.
-              (make-status interface 'bad #f format-interface-not-found))))))
+              (make-status interface 'bad #f format-interface-not-found)))
+        (begin
+          ;; First run..!
+          (set! %interfaces (make-interface-cache now (get-network-statistics)))
+          (make-status interface 'degraded #f format-no-data)))))
 
 (define (format-bytes bytes)
   ;; XXX: Consider using a consistent output length to avoid resizing.
