@@ -13,6 +13,6 @@ autom4te.cache
 /build-aux/test-driver
 pre-inst-env
 test-env
-goobar/external.scm
 scripts/goobar
 status/collector/disk.scm
+status/collector/pulseaudio.scm

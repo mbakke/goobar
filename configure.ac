@@ -8,7 +8,6 @@ AM_INIT_AUTOMAKE([foreign -Wall -Wno-portability])
 AC_CONFIG_FILES([pre-inst-env:build-aux/pre-inst-env.in], [chmod +x pre-inst-env])
 AC_CONFIG_FILES([test-env:build-aux/test-env.in], [chmod +x test-env])
 AC_CONFIG_FILES([scripts/goobar], [chmod +x scripts/goobar])
-AC_CONFIG_FILES([ goobar/external.scm ])
 AC_CONFIG_FILES([ Makefile ])
 
 dnl Check common programs

@@ -1,13 +1,14 @@
 guilemoduledir=$(prefix)/share/guile/site/$(GUILE_EFFECTIVE_VERSION)
 guileobjectdir=$(libdir)/guile/$(GUILE_EFFECTIVE_VERSION)/site-ccache
 
-GOBJECTS = $(SOURCES:%.scm=%.go) goobar/external.go
+GOBJECTS = $(SOURCES:%.scm=%.go)
 
 nobase_guilemodule_DATA = $(SOURCES) $(NOCOMP_SOURCES)
 nobase_guileobject_DATA = $(GOBJECTS)
 
 nobase_nodist_guilemodule_DATA = \
-	goobar/external.scm
+	status/collector/pulseaudio.scm
+
 
 # Make sure source files are installed first, so that the mtime of
 # installed compiled files is greater than that of installed source
@@ -32,9 +33,14 @@ STATVFS_OR_DF = df
 endif
 
 do_subst = $(SED) \
+	-e 's,[@]PACTL[@],$(PACTL),g' \
+	-e 's,[@]DF[@],$(DF),g' \
 	-e 's,[@]STATVFS_OR_DF[@],$(STATVFS_OR_DF),g'
 
 status/collector/disk.scm: status/collector/disk.scm.in Makefile
+	$(do_subst) < $< > $@
+
+status/collector/pulseaudio.scm: status/collector/pulseaudio.scm.in Makefile
 	$(do_subst) < $< > $@
 
 bin_SCRIPTS = \
@@ -85,9 +91,7 @@ AM_SH_LOG_FLAGS = -x -e
 EXTRA_DIST = \
 	$(SOURCES) \
 	pre-inst-env.in \
-	guix.scm \
-	goobar/external.scm.in
+	guix.scm
 
 CLEANFILES = \
-	$(GOBJECTS) \
-	goobar/external.scm
+	$(GOBJECTS)

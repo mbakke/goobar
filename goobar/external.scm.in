@@ -1,7 +1,0 @@
-(define-module (goobar external)
-  #:export (%df %pactl))
-
-;; External programs that we depend upon.
-;; (TODO: Replace with native Guile variants!)
-(define %df "@DF@")
-(define %pactl "@PACTL@")

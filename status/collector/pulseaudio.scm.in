@@ -21,10 +21,11 @@
   #:use-module (ice-9 textual-ports)
   #:use-module (ice-9 match)
   #:use-module (ice-9 format)
-  #:use-module (goobar external)
   #:export (pulseaudio-status))
 
 ;; TODO: Can we do this without pactl..?
+(define %pactl "@PACTL@")
+
 (define (muted? sink)
   (let* ((pipe (open-input-pipe (string-append %pactl " get-sink-mute "
                                                sink)))
