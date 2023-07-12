@@ -37,19 +37,13 @@
   "#8B0000"
   (state->color 'critical))
 
-(test-assert "validate color, valid color"
+(test-assert "validate-color, valid color"
   (validate-color "#000000"))
 
-(test-eq "validate color, invalid color, short"
-  #f
-  (validate-color "#ABC"))
-
-(test-eq "validate color, invalid color, empty string"
-  #f
-  (validate-color ""))
-
-(test-eq "validate color, invalid color, non-hex"
-  #f
-  (validate-color "#XXXXXX"))
+(test-assert "validate-color, invalid color"
+  (not (or (validate-color "#ABC")
+           (validate-color "")
+           (validate-color "#XXXXXX")
+           (validate-color 000000))))
 
 (exit (zero? (test-runner-fail-count (test-end))))
