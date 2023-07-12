@@ -1,14 +1,17 @@
 guilemoduledir=$(prefix)/share/guile/site/$(GUILE_EFFECTIVE_VERSION)
 guileobjectdir=$(libdir)/guile/$(GUILE_EFFECTIVE_VERSION)/site-ccache
 
-GOBJECTS = $(SOURCES:%.scm=%.go)
+GOBJECTS = $(nobase_nodist_guilemodule_DATA:%.scm=%.go) $(SOURCES:%.scm=%.go)
 
 nobase_guilemodule_DATA = $(SOURCES) $(NOCOMP_SOURCES)
 nobase_guileobject_DATA = $(GOBJECTS)
 
 nobase_nodist_guilemodule_DATA = \
-	status/collector/pulseaudio.scm
+	status/collector/disk.scm
 
+if HAVE_PACTL
+nobase_nodist_guilemodule_DATA += status/collector/pulseaudio.scm
+endif
 
 # Make sure source files are installed first, so that the mtime of
 # installed compiled files is greater than that of installed source
@@ -37,10 +40,7 @@ do_subst = $(SED) \
 	-e 's,[@]DF[@],$(DF),g' \
 	-e 's,[@]STATVFS_OR_DF[@],$(STATVFS_OR_DF),g'
 
-status/collector/disk.scm: status/collector/disk.scm.in Makefile
-	$(do_subst) < $< > $@
-
-status/collector/pulseaudio.scm: status/collector/pulseaudio.scm.in Makefile
+%.scm: %.scm.in Makefile
 	$(do_subst) < $< > $@
 
 bin_SCRIPTS = \
@@ -54,13 +54,11 @@ SOURCES = \
 	status/collector/battery.scm \
 	status/collector/cpu-temperature.scm \
 	status/collector/cpu-usage.scm \
-	status/collector/disk.scm \
 	status/collector/ethernet.scm \
 	status/collector/ipv6.scm \
 	status/collector/load.scm \
 	status/collector/memory.scm \
 	status/collector/network-rate.scm \
-	status/collector/pulseaudio.scm \
 	status/collector/time.scm \
 	status/collector/wifi.scm \
 	goobar/annotation.scm \
@@ -74,11 +72,14 @@ SOURCES = \
 TESTS = \
 	tests/goobar/annotation.scm	\
 	tests/goobar/colors.scm		\
-	tests/goobar/test-config.sh	\
 	tests/goobar/test-output.sh	\
 	tests/status/battery.scm	\
 	tests/status/network-rate.scm	\
 	tests/status/wifi.scm
+
+if HAVE_PACTL
+TESTS += tests/goobar/test-config.sh
+endif
 
 TEST_EXTENSIONS = .scm .sh
 
@@ -88,10 +89,17 @@ AM_SCM_LOG_FLAGS = --no-auto-compile -L "$(top_srcdir)"
 SH_LOG_COMPILER = $(top_builddir)/test-env $(SHELL)
 AM_SH_LOG_FLAGS = -x -e
 
+dist_doc_DATA = COPYING README.md
+
 EXTRA_DIST = \
 	$(SOURCES) \
-	pre-inst-env.in \
+	$(TESTS) \
+	status/collector/disk.scm.in \
+	status/collector/pulseaudio.scm.in \
+	build-aux/pre-inst-env.in \
+	build-aux/test-env.in \
 	guix.scm
 
 CLEANFILES = \
+	$(nobase_nodist_guilemodule_DATA) \
 	$(GOBJECTS)

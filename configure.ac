@@ -54,12 +54,17 @@ AS_IF([test ! "x$have_guile_statvfs" = "xyes"], [
 ])
 
 
-dnl TODO: Make it optional.
-AC_ARG_VAR(PACTL, [pactl path])
-AC_PATH_PROG(PACTL, [pactl])
-if test -z "$PACTL"
-then
-  AC_MSG_ERROR([pactl not found, please install pulseaudio])
-fi
+AC_ARG_WITH([pulseaudio],
+  AS_HELP_STRING([--without-pulseaudio], [Disable pulseaudio support]))
+
+AS_IF([test "x$with_pulseaudio" != "xno"],[
+  AC_ARG_VAR(PACTL, [pactl path])
+  AC_PATH_PROG(PACTL, [pactl])
+  if test -z "$PACTL"
+  then
+    AC_MSG_ERROR([Pulseaudio requested, but pactl not found!])
+  fi
+])
+AM_CONDITIONAL([HAVE_PACTL], [test ! "x$PACTL" = "x"])
 
 AC_OUTPUT
