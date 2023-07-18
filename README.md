@@ -77,13 +77,16 @@ Example:
        (wifi-status "wlp0s20f3"
                     #:format
                     (lambda (status)
-                      (let ((data (status-data status)))
-                        (if (status-bad? status)
-                            "down"
-                            (format #f "~a (~d%, ~a)"
+                      (if (status-bad? status)
+                          "down"
+                          (let ((data (status-data status)))
+                            (format #f "~a (~d%~a)"
                                     (assoc-ref data 'ssid)
                                     (assoc-ref data 'quality)
-                                    (format-bitrate (assoc-ref data 'bitrate)))))))
+                                    ;; Print bitrate only when available.
+                                    (format #f "~@[, ~a~]"
+                                            (and=> (assoc-ref data 'bitrate)
+                                                   format-bitrate)))))))
        ;; Disable separator to meld with the rate status below.
        #:separator? #f)
       (network-rate-status "wlp0s20f3"
