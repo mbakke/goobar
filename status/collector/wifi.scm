@@ -86,13 +86,12 @@
 
 (define (format-bitrate bitrate)
   (if bitrate
+      ;; TODO: Use G/M/K when sensible.
       (format #f "~1,1f Mb/s" (/ bitrate 10))
-      "unknown bitrate"))
+      "? Mb/s"))
 
 (define (format-wifi-status status)
   (let* ((data (status-data status))
-         (connected? (assoc-ref data 'connected?))
-         (bitrate (assoc-ref data 'bitrate))
          (quality (assoc-ref data 'quality))
          (ssid (assoc-ref data 'ssid)))
     (if (status-bad? status)
