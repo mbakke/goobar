@@ -15,6 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Goobar. If not, see <https://www.gnu.org/licenses/>.
 
+tmp_dir="$(mktemp -d)"
+trap "rm -rf $tmp_dir" EXIT
+
+# Save the PID file to a temporary directory to avoid races.
+export XDG_RUNTIME_DIR="$tmp_dir"
+
 # Ensure i3bar output is valid JSON.
 json="$(goobar -o i3bar --one-shot)"
 jq -e . <<< "$json"

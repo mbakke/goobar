@@ -20,6 +20,7 @@
   #:use-module (srfi srfi-19)
   #:use-module (goobar options)
   #:use-module (goobar output)
+  #:use-module (goobar processes)
   #:autoload (goobar configuration) (default-configuration)
   #:export (goobar-main))
 
@@ -60,6 +61,7 @@
          (tailer (output-tail printer))
          (footer (output-foot printer)))
     (when help (display-help-and-exit))
+    (save-pid-file)
     (format (current-error-port) "goobar: using '~a' output~%"
             (output-type printer))
     (when header (display header))

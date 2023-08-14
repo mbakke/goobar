@@ -62,16 +62,19 @@ SOURCES = \
 	status/collector/time.scm \
 	status/collector/wifi.scm \
 	goobar/annotation.scm \
-	goobar/configuration.scm \
 	goobar/colors.scm \
+	goobar/configuration.scm \
 	goobar/options.scm \
 	goobar/output/element.scm \
 	goobar/output.scm \
-	goobar.scm
+	goobar/processes.scm \
+	goobar.scm \
+	tests/helper.scm
 
 TESTS = \
 	tests/goobar/annotation.scm	\
 	tests/goobar/colors.scm		\
+	tests/goobar/processes.scm	\
 	tests/goobar/test-output.sh	\
 	tests/status/battery.scm	\
 	tests/status/network-rate.scm	\
