@@ -48,6 +48,7 @@ bin_SCRIPTS = \
 
 SOURCES = \
 	status.scm \
+	status/http-client.scm \
 	status/network.scm \
 	status/nl80211.scm \
 	status/collector/backlight.scm \
@@ -60,6 +61,7 @@ SOURCES = \
 	status/collector/memory.scm \
 	status/collector/network-rate.scm \
 	status/collector/time.scm \
+	status/collector/weather.scm \
 	status/collector/wifi.scm \
 	goobar/annotation.scm \
 	goobar/colors.scm \
@@ -69,7 +71,8 @@ SOURCES = \
 	goobar/output.scm \
 	goobar/processes.scm \
 	goobar.scm \
-	tests/helper.scm
+	tests/helper.scm \
+	tests/http.scm
 
 TESTS = \
 	tests/goobar/annotation.scm	\
@@ -77,7 +80,9 @@ TESTS = \
 	tests/goobar/processes.scm	\
 	tests/goobar/test-output.sh	\
 	tests/status/battery.scm	\
+	tests/status/http-client.scm	\
 	tests/status/network-rate.scm	\
+	tests/status/weather.scm	\
 	tests/status/wifi.scm
 
 if HAVE_PACTL

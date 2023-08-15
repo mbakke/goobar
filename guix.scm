@@ -4,7 +4,6 @@
              (guix build-system gnu)
              (guix gexp)
              (gnu packages autotools)
-             (gnu packages base)
              (gnu packages flex)
              (gnu packages gettext)
              (gnu packages gperf)
@@ -12,6 +11,7 @@
              (gnu packages guile-xyz)
              (gnu packages pkg-config)
              (gnu packages pulseaudio)
+             (gnu packages tls)
              (gnu packages texinfo)
              (gnu packages web)
              ((guix licenses) #:select (gpl3+)))
@@ -87,7 +87,11 @@
                                deps)))))))))))))
   (native-inputs
    (list autoconf automake guile/statvfs jq pkg-config))
-  (inputs (list coreutils-minimal guile/statvfs guile-netlink/nl80211 pulseaudio))
+  (inputs (list guile/statvfs
+                guile-gnutls
+                guile-netlink/nl80211
+                guile-srfi-180
+                pulseaudio))
   (home-page "https://github.com/mbakke/goobar")
   (synopsis "Status line generator")
   (description
