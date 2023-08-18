@@ -52,7 +52,7 @@
 (define (nl80211-bss-info interface)
   (let* ((scan (get-scan interface))
          (msg (car scan)))
-    (if (and (memv (message-kind msg) (list NL80211_CMD_GET_SCAN))
+    (if (and (memv (message-kind msg) (list NL80211_CMD_NEW_SCAN_RESULTS))
              ;; (message-data msg) may be #f in some circumstances.
              (message-data msg))
         (let ((attrs (generic-message-attrs (message-data msg))))
@@ -70,7 +70,7 @@
 (define (nl80211-station-info interface bssid)
   (let* ((station (get-station interface bssid))
          (msg (car station)))
-    (if (and (memv (message-kind msg) (list NL80211_CMD_GET_SCAN))
+    (if (and (memv (message-kind msg) (list NL80211_CMD_NEW_SCAN_RESULTS))
              (message-data msg))
         (let* ((attrs (generic-message-attrs (message-data msg)))
                (sta-info (get-attr attrs NL80211_ATTR_STA_INFO)))
