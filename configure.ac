@@ -29,6 +29,18 @@ AC_SUBST([guilemoduledir])
 AC_SUBST([guileobjectdir])
 
 dnl Check for required Guile modules.
+GUILE_MODULE_AVAILABLE([have_guile_gnutls], [(gnutls)])
+AM_CONDITIONAL([HAVE_GUILE_GNUTLS], [test "x$have_guile_gnutls" = "xyes"])
+AS_IF([test ! "x$have_guile_gnutls" = "xyes"], [
+  AC_MSG_ERROR([Guile-GnuTLS not found.])
+])
+
+GUILE_MODULE_AVAILABLE([have_guile_srfi_180], [(srfi srfi-180)])
+AM_CONDITIONAL([HAVE_GUILE_SRFI_180], [test "x$have_guile_srfi_180" = "xyes"])
+AS_IF([test ! "x$have_guile_srfi_180" = "xyes"], [
+  AC_MSG_ERROR([SRFI-180 not found.])
+])
+
 GUILE_MODULE_AVAILABLE([have_guile_netlink], [(netlink connection)])
 AM_CONDITIONAL([HAVE_GUILE_NETLINK], [test "x$have_guile_netlink" = "xyes"])
 AS_IF([test ! "x$have_guile_netlink" = "xyes"], [
