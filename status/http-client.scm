@@ -53,6 +53,10 @@
         (cond ((eq? 'getaddrinfo-error (exception-kind err))
                ;; Gracefully handle DNS lookup failure.
                #f)
+              ((eq? 'gnutls-error (exception-kind err))
+               ;; Similar for TLS errors, e.g. when connection abruptly closes.
+               ;; TODO: Should probably give the user a clue somehow.
+               #f)
               (else (raise-exception err))))
     (lambda ()
       (let ((response body (http-request uri
