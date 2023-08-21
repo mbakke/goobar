@@ -57,6 +57,9 @@
     #:modules `((ice-9 match) (ice-9 ftw) ,@%gnu-build-system-modules)
     #:phases
     #~(modify-phases %standard-phases
+        (add-before 'check 'set-XDG_CACHE_HOME
+          (lambda _
+            (setenv "XDG_CACHE_HOME" "/tmp")))
         (add-after 'install 'wrap-executable
           (lambda* (#:key inputs outputs #:allow-other-keys)
             (let* ((out #$output)

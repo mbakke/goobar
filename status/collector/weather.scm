@@ -28,9 +28,11 @@
                                 (url "https://nominatim.openstreetmap.org"))
   ;; Return a (lat . lon) pair based on NAME.  Example:
   ;; (location->coordinates "bardufoss,norway") => '("69.065637" . "18.5159237")
-  (let ((data (http-fetch
+  (let ((data (http-fetch/cached
                (string-append url "/search?q="
-                              (uri-encode name) "&format=json"))))
+                              (uri-encode name) "&format=json")
+               ;; Cache coordinates for a month.
+               (* 60 60 24 30))))
     (match data
       ("[]"
        (format (current-error-port) "no coordinates found for \"~a\"~%" name)
@@ -46,10 +48,12 @@
 (define* (weather-status coordinates #:key
                          (url "https://api.met.no"))
   (if (and coordinates (pair? coordinates))
-      (let ((weather (http-fetch (string-append url "/weatherapi"
-                                                "/locationforecast/2.0/compact"
-                                                "?lat=" (car coordinates)
-                                                "&lon=" (cdr coordinates)))))
+      (let ((weather (http-fetch/cached
+                      (string-append url "/weatherapi"
+                                     "/locationforecast/2.0/compact"
+                                     "?lat=" (car coordinates)
+                                     "&lon=" (cdr coordinates))
+                      600)))
         (if weather
             (let* ((parsed (call-with-input-string weather json-read))
                    (properties (assoc-ref parsed 'properties))
