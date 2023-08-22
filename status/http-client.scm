@@ -104,7 +104,7 @@
 (define (digest-sha256 str)
   ;; Return a hexadecimal SHA256 digest of STR.
   (string-join
-   (map (cut format #f "~x" <>)
+   (map (cut format #f "~2,'0x" <>)
         (bytevector->u8-list (hash-direct digest/sha256
                                           (string->utf8 str))))
    ""))

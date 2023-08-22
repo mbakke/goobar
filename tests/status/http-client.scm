@@ -62,11 +62,10 @@
 (define %cache-directory (@@ (status http-client) %cache-directory))
 (define cache-file-for-uri (@@ (status http-client) cache-file-for-uri))
 
-;; TODO: enable this if <https://gitlab.com/gnutls/guile/-/issues/18> is fixed.
-;; (test-equal "cache-file-for-uri"
-;;   ;; Ensure GnuTLS hash-direct does not change under our feet.
-;;   "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
-;;   (basename (cache-file-for-uri "test")))
+(test-equal "cache-file-for-uri"
+  ;; Ensure GnuTLS hash-direct does not change under our feet.
+  "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+  (basename (cache-file-for-uri "test")))
 
 (test-assert "fetch with cache, new"
   (with-http-server '((200 "yay"))
