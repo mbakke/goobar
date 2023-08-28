@@ -14,7 +14,9 @@
              (gnu packages tls)
              (gnu packages texinfo)
              (gnu packages web)
-             ((guix licenses) #:select (gpl3+)))
+             ((guix licenses) #:select (gpl3+))
+             (ice-9 match)
+             (srfi srfi-1))
 
 ;; Use my custom fork of Guile-Netlink with NL80211 support until
 ;; the changes are upstreamed.
@@ -47,6 +49,15 @@
      (modify-inputs (package-native-inputs guile-3.0)
        (prepend autoconf automake flex gnu-gettext gperf libtool texinfo)))))
 
+(define guile-dependency?
+  (match-lambda
+    ((label pkg)
+     (if (string-prefix? "guile-" label)
+         pkg #f))
+    ((? package? pkg)                   ;future-proof!
+     (if (string-prefix? "guile-" (package-name pkg))
+         pkg #f))))
+
 (package
   (name "goobar")
   (version "0.1")
@@ -65,8 +76,8 @@
             (let* ((out #$output)
                    (bin (string-append out "/bin"))
                    (site (string-append out "/share/guile/site"))
-                   (netlink #$(this-package-input "guile-netlink"))
-                   (deps (list netlink)))
+                   (deps '#$(filter-map guile-dependency?
+                                        (package-transitive-inputs this-package))))
               (match (scandir site)
                 (("." ".." version)
                  (let ((modules (string-append site "/" version))
