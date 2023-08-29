@@ -48,17 +48,20 @@
 (define* (http-fetch uri #:key
                      (method 'GET)
                      (headers '())
-                     (keep-alive? #f))
+                     (keep-alive? #f)
+                     (log-port (current-error-port)))
   ;; Return the data from URI as a string, following redirects.
   ;; Return #f if the final response is anything other than 200.
   (with-exception-handler
       (lambda (err)
         (cond ((eq? 'getaddrinfo-error (exception-kind err))
                ;; Gracefully handle DNS lookup failure.
+               (format log-port "goobar: DNS resolution failure~%")
                #f)
               ((eq? 'gnutls-error (exception-kind err))
                ;; Similar for TLS errors, e.g. when connection abruptly closes.
-               ;; TODO: Should probably give the user a clue somehow.
+               (format log-port "goobar: HTTPS connection failed: `~a'~%"
+                       (exception-message err))
                #f)
               (else (raise-exception err))))
     (lambda ()
@@ -77,11 +80,11 @@
             307                         ;temporary redirection
             308)                        ;permanent redirection
            (let ((redirect (response-location response)))
-             (format (current-error-port) "following redirect to ~a...~%"
+             (format log-port "following redirect to ~a...~%"
                      (uri->string redirect))
              (http-fetch redirect #:method method)))
           (else
-           (format (current-error-port)
+           (format log-port
                    "failed to fetch ~a: ~d ~a~%"
                    uri
                    (response-code response)
@@ -131,8 +134,10 @@
                   system)
           (exit 1)))))
 
-(define* (fetch-with-cache uri cache #:key (headers '()))
-  (let ((result (http-fetch uri #:headers headers)))
+(define* (fetch-with-cache uri cache #:key
+                           (headers '())
+                           (log-port (current-error-port)))
+  (let ((result (http-fetch uri #:headers headers #:log-port log-port)))
     (call-with-output-file cache
       (lambda (port)
         ;; TODO: Serve stale content if result is false and cache exist?
@@ -142,7 +147,9 @@
 ;; TODO: Clean up stale cache..?
 (define* (http-fetch/cached uri
                             #:optional (ttl 60)
-                            #:key (headers '()))
+                            #:key
+                            (headers '())
+                            (log-port (current-error-port)))
   (create-cache-directory!)
 
   ;; TODO: support if-modified-since..!
@@ -154,8 +161,13 @@
                (age (- now (stat:mtime stat))))
           (cond
            ;; TODO: Asynchronously update cache.
-           ((> age ttl) (fetch-with-cache uri cache-file #:headers headers))
+           ((> age ttl) (fetch-with-cache uri cache-file
+                                          #:headers headers
+                                          #:log-port log-port))
            ;; Cache negative results for 1 minute.
-           ((zero? size) (http-fetch/cached uri #:headers headers))
+           ((zero? size) (http-fetch/cached uri 60 #:headers headers
+                                            #:log-port log-port))
            (else (call-with-input-file cache-file get-string-all))))
-        (fetch-with-cache uri cache-file #:headers headers))))
+        (fetch-with-cache uri cache-file
+                          #:headers headers
+                          #:log-port log-port))))

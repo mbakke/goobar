@@ -34,11 +34,9 @@
                ;; Cache coordinates for a month.
                (* 60 60 24 30))))
     (match data
+      (#f #f)                           ;http-client error
       ("[]"
-       (format (current-error-port) "no coordinates found for \"~a\"~%" name)
-       #f)
-      (#f
-       (format (current-error-port) "fetching coordinates failed~%")
+       (format (current-error-port) "warning: no coordinates found for \"~a\"~%" name)
        #f)
       (_
        (let* ((parsed (call-with-input-string data json-read))
