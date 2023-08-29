@@ -165,8 +165,12 @@
                                           #:headers headers
                                           #:log-port log-port))
            ;; Cache negative results for 1 minute.
-           ((zero? size) (http-fetch/cached uri 60 #:headers headers
-                                            #:log-port log-port))
+           ((zero? size)
+            (if (> age 60)
+                (fetch-with-cache uri cache-file
+                                  #:headers headers
+                                  #:log-port log-port)
+                #f))
            (else (call-with-input-file cache-file get-string-all))))
         (fetch-with-cache uri cache-file
                           #:headers headers
