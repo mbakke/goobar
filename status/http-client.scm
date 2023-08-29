@@ -58,6 +58,12 @@
                ;; Gracefully handle DNS lookup failure.
                (format log-port "goobar: DNS resolution failure~%")
                #f)
+              ((and (eq? 'system-error (exception-kind err))
+                    (string=? "connect" (exception-origin err)))
+               ;; And connection failures.
+               (format log-port "goobar: connect failed: ~a~%"
+                       (car (exception-irritants err)))
+               #f)
               ((eq? 'gnutls-error (exception-kind err))
                ;; Similar for TLS errors, e.g. when connection abruptly closes.
                (format log-port "goobar: HTTPS connection failed: `~a'~%"
