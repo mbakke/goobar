@@ -83,7 +83,7 @@
                    format-weather-status-failure)))
 
 (define (format-weather-status-failure status)
-  (format #f "~a" (status-data status)))
+  "N/A")
 
 (define (format-weather-status status)
   (let* ((data (status-data status))

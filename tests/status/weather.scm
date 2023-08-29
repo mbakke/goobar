@@ -99,9 +99,11 @@
     (location->coordinates "Denpasar,Bali,Indonesia"
                            #:url (%local-url))))
 
-(test-equal "weather-status, missing coordinates"
-  "<no coordinates>"
-  (status->string (weather-status #f)))
+(test-assert "weather-status, missing coordinates"
+  (let ((status (weather-status #f)))
+    (and (eqv? 'bad (status-state status))
+         (string=? "<no coordinates>" (status-data status))
+         (string=? "N/A" (status->string status)))))
 
 (test-equal "weather-status, valid"
   "26°C"
@@ -110,12 +112,12 @@
      (weather-status '("-8.6524973" . "115.2191175")
                      #:url (%local-url)))))
 
-(test-equal "weather-status, server error"
-  "<fetch failed>"
+(test-assert "weather-status, server error"
   (with-http-server '((500 "nope"))
-    (status->string
-     (weather-status '("0" . "0")
-                     #:url (%local-url)))))
+    (let ((status (weather-status '("0" . "0") #:url (%local-url))))
+      (and (eqv? 'bad (status-state status))
+           (string=? "<fetch failed>" (status-data status))
+           (string=? "N/A" (status->string status))))))
 
 ;; Commented code is no good, but serves as a reminder to one day
 ;; handle timeout properly...
