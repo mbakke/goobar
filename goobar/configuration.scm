@@ -20,40 +20,49 @@
   #:use-module (status collector battery)
   #:use-module (status collector cpu-temperature)
   #:use-module (status collector disk)
-  #:use-module (status collector ethernet)
   #:use-module (status collector ipv6)
   #:use-module (status collector load)
   #:use-module (status collector memory)
   #:use-module (status collector time)
-  #:use-module (status collector wifi)
-  #:use-module (netlink constant)
-  #:use-module (ip link)
   #:use-module (ice-9 match)
   #:use-module (srfi srfi-1)
   #:export (default-configuration))
 
+(eval-when (expand load eval)
+  (define %have-network
+    (false-if-exception (use-modules (netlink constant)
+                                     (ip link)
+                                     (status collector ethernet)
+                                     (status collector wifi))))
+
+  (define %network-devices
+    (if %have-network
+        (let* ((network-links (filter (lambda (link)
+                                        (not (equal? (link-type link)
+                                                     ARPHRD_LOOPBACK)))
+                                      (get-links)))
+               ;; XXX: Is there a more reliable way to distinguish wifi vs eth?
+               (wireless-devices (filter-map (lambda (link)
+                                               (let ((name (link-name link)))
+                                                 (if (string-prefix? "w" name)
+                                                     name
+                                                     #f)))
+                                             network-links))
+               (ethernet-devices (filter-map (lambda (link)
+                                               (let ((name (link-name link)))
+                                                 (if (string-prefix? "e" name)
+                                                     name
+                                                     #f)))
+                                             network-links)))
+          `(,@(map (lambda (if) (wifi-status if)) wireless-devices)
+            ,@(map (lambda (if) (ethernet-status if)) ethernet-devices)))
+        '())))
+
 (define (default-configuration)
-  (let* ((network-links (filter (lambda (link)
-                                  (not (equal? (link-type link) ARPHRD_LOOPBACK)))
-                                (get-links)))
-         ;; XXX: Is there a more reliable way to distinguish wifi vs eth devices?
-         (wireless-devices (filter-map (lambda (link)
-                                         (let ((name (link-name link)))
-                                           (if (string-prefix? "w" name)
-                                               name
-                                               #f)))
-                                       network-links))
-         (ethernet-devices (filter-map (lambda (link)
-                                         (let ((name (link-name link)))
-                                           (if (string-prefix? "e" name)
-                                               name
-                                               #f)))
-                                       network-links))
-         (backlight? (file-exists? "/sys/class/backlight/intel_backlight"))
-         (battery? (file-exists? "/sys/class/power_supply/BAT0/uevent")))
+  (let ((backlight? (file-exists? "/sys/class/backlight/intel_backlight"))
+        (battery? (file-exists? "/sys/class/power_supply/BAT0/uevent")))
     `(,(disk-status "/")
-      ,@(map (lambda (if) (wifi-status if)) wireless-devices)
-      ,@(map (lambda (if) (ethernet-status if)) ethernet-devices)
+      ,@%network-devices
       ,(ipv6-status)
       ,@(if battery?
             (list (battery-status "BAT0"))

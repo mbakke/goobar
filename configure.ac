@@ -30,31 +30,32 @@ AC_SUBST([guileobjectdir])
 
 dnl Check for required Guile modules.
 GUILE_MODULE_AVAILABLE([have_guile_gnutls], [(gnutls)])
-AM_CONDITIONAL([HAVE_GUILE_GNUTLS], [test "x$have_guile_gnutls" = "xyes"])
 AS_IF([test ! "x$have_guile_gnutls" = "xyes"], [
-  AC_MSG_ERROR([Guile-GnuTLS not found.])
+  AC_MSG_WARN([Guile-GnuTLS not found, HTTP functionality unavailable])
 ])
+AM_CONDITIONAL([HAVE_GUILE_GNUTLS], [test "x$have_guile_gnutls" = "xyes"])
 
 GUILE_MODULE_AVAILABLE([have_guile_srfi_180], [(srfi srfi-180)])
-AM_CONDITIONAL([HAVE_GUILE_SRFI_180], [test "x$have_guile_srfi_180" = "xyes"])
 AS_IF([test ! "x$have_guile_srfi_180" = "xyes"], [
-  AC_MSG_ERROR([SRFI-180 not found.])
+  AC_MSG_WARN([SRFI-180 not found, JSON-based collectors unavailable.])
 ])
+AM_CONDITIONAL([HAVE_GUILE_SRFI_180], [test "x$have_guile_srfi_180" = "xyes"])
 
 GUILE_MODULE_AVAILABLE([have_guile_netlink], [(netlink connection)])
-AM_CONDITIONAL([HAVE_GUILE_NETLINK], [test "x$have_guile_netlink" = "xyes"])
 AS_IF([test ! "x$have_guile_netlink" = "xyes"], [
-  AC_MSG_ERROR([Guile-Netlink not found.])
+  AC_MSG_WARN([Guile-Netlink not found, ethernet and wifi information unavailable.])
 ])
+AM_CONDITIONAL([HAVE_GUILE_NETLINK], [test "x$have_guile_netlink" = "xyes"])
 
-GUILE_MODULE_AVAILABLE([have_guile_netlink_nl80211], [(netlink nl80211)])
-AM_CONDITIONAL([HAVE_GUILE_NETLINK_NL80211], [test "x$have_guile_netlink_nl80211" = "xyes"])
-AS_IF([test ! "x$have_guile_netlink_nl80211" = "xyes"], [
-  AC_MSG_ERROR([Guile-Netlink is too old (1.2.0 or higher is required)])
+AS_IF([test "x$have_guile_netlink" = "xyes"], [
+  GUILE_MODULE_AVAILABLE([have_guile_netlink_nl80211], [(netlink nl80211)])
+  AS_IF([test ! "x$have_guile_netlink_nl80211" = "xyes"], [
+    AC_MSG_ERROR([Guile-Netlink is too old (1.3.0 or higher is required)])
+  ])
 ])
+AM_CONDITIONAL([HAVE_GUILE_NETLINK_NL80211], [test "x$have_guile_netlink_nl80211" = "xyes"])
 
 GUILE_MODULE_CHECK([have_guile_statvfs], [(guile)], [(statvfs (getcwd))], ["statvfs"])
-AM_CONDITIONAL([HAVE_GUILE_STATVFS], [test "x$have_guile_statvfs" = "xyes"])
 AS_IF([test ! "x$have_guile_statvfs" = "xyes"], [
   AC_MSG_NOTICE([statvfs is not available in Guile, deferring to `df'])
   AC_ARG_VAR(DF, [df path])
@@ -64,6 +65,7 @@ AS_IF([test ! "x$have_guile_statvfs" = "xyes"], [
     AC_MSG_ERROR([df not found either, please install coreutils or upgrade Guile!])
   fi
 ])
+AM_CONDITIONAL([HAVE_GUILE_STATVFS], [test "x$have_guile_statvfs" = "xyes"])
 
 
 AC_ARG_WITH([pulseaudio],

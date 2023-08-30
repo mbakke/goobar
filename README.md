@@ -10,10 +10,23 @@ It consists of two distinct parts: a set of *status collectors*, and a program
 that converts their results to a format that can be consumed by window managers
 such as Sway or i3.
 
+# Requirements
+
+Goobar has no dependencies apart from Guile itself.  For extra functionality,
+consider installing:
+
+* [Guile-Netlink](https://git.lepiller.eu/guile-netlink/)
+for Ethernet and WiFi information.
+* [Guile-GnuTLS](https://gitlab.com/gnutls/guile/)
+for HTTP-based status collectors.
+* [Guile-SRFI-180](https://github.com/scheme-requests-for-implementation/srfi-180)
+for status collectors that consume JSON.
+* [PulseAudio](https://www.freedesktop.org/wiki/Software/PulseAudio/)
+for PulseAudio information.
+
 # Installation
 
-First make sure Guile and [Guile-Netlink](https://git.lepiller.eu/guile-netlink/)
-are installed and usable on your system.  Then, from a source checkout, run:
+From a source checkout, run:
 
 ```
 $ autoreconf -vif

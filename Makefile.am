@@ -48,21 +48,15 @@ bin_SCRIPTS = \
 
 SOURCES = \
 	status.scm \
-	status/http-client.scm \
-	status/network.scm \
-	status/nl80211.scm \
 	status/collector/backlight.scm \
 	status/collector/battery.scm \
 	status/collector/cpu-temperature.scm \
 	status/collector/cpu-usage.scm \
-	status/collector/ethernet.scm \
 	status/collector/ipv6.scm \
 	status/collector/load.scm \
 	status/collector/memory.scm \
 	status/collector/network-rate.scm \
 	status/collector/time.scm \
-	status/collector/weather.scm \
-	status/collector/wifi.scm \
 	goobar/annotation.scm \
 	goobar/colors.scm \
 	goobar/configuration.scm \
@@ -71,8 +65,7 @@ SOURCES = \
 	goobar/output.scm \
 	goobar/processes.scm \
 	goobar.scm \
-	tests/helper.scm \
-	tests/http.scm
+	tests/helper.scm
 
 TESTS = \
 	tests/goobar/annotation.scm	\
@@ -80,14 +73,32 @@ TESTS = \
 	tests/goobar/processes.scm	\
 	tests/goobar/test-output.sh	\
 	tests/status/battery.scm	\
-	tests/status/http-client.scm	\
-	tests/status/network-rate.scm	\
-	tests/status/weather.scm	\
+	tests/status/network-rate.scm
+
+if HAVE_GUILE_NETLINK
+SOURCES += \
+	status/network.scm \
+	status/nl80211.scm \
+	status/collector/ethernet.scm \
+	status/collector/wifi.scm
+TESTS += \
 	tests/status/wifi.scm
 
 if HAVE_PACTL
 TESTS += tests/goobar/test-config.sh
-endif
+endif # HAVE_PACTL
+endif # HAVE_GUILE_NETLINK
+
+if HAVE_GUILE_GNUTLS
+SOURCES += \
+	status/http-client.scm \
+	tests/http.scm
+TESTS += tests/status/http-client.scm
+if HAVE_GUILE_SRFI_180
+SOURCES += status/collector/weather.scm
+TESTS += tests/status/weather.scm
+endif # HAVE_GUILE_SRFI_180
+endif # HAVE_GUILE_GNUTLS
 
 TEST_EXTENSIONS = .scm .sh
 
