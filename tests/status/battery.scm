@@ -30,6 +30,12 @@
 ;;;   POWER_NOW  is in Microwatts
 ;;;   ENERGY_FOO is in Microwatthours
 ;;;
+;;; Upstream documentation:
+;;;
+;;;   https://www.kernel.org/doc/Documentation/power/power_supply_class.txt
+;;;   https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-class-power
+;;;
+;;; Code:
 
 (define (call-with-temporary-battery-status-file spec proc)
   "Run PROC with a temporary file created from SPEC.  Delete the file
