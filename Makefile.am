@@ -1,9 +1,10 @@
 guilemoduledir=$(prefix)/share/guile/site/$(GUILE_EFFECTIVE_VERSION)
 guileobjectdir=$(libdir)/guile/$(GUILE_EFFECTIVE_VERSION)/site-ccache
 
-GOBJECTS = $(nobase_nodist_guilemodule_DATA:%.scm=%.go) $(SOURCES:%.scm=%.go)
+# Treat (goobar configuration) specially because it depends on everything else.
+GOBJECTS = $(SOURCES:%.scm=%.go) $(nobase_nodist_guilemodule_DATA:%.scm=%.go) goobar/configuration.go
 
-nobase_guilemodule_DATA = $(SOURCES) $(NOCOMP_SOURCES)
+nobase_guilemodule_DATA = $(SOURCES) $(NOCOMP_SOURCES) goobar/configuration.scm
 nobase_guileobject_DATA = $(GOBJECTS)
 
 nobase_nodist_guilemodule_DATA = \
@@ -59,7 +60,6 @@ SOURCES = \
 	status/collector/time.scm \
 	goobar/annotation.scm \
 	goobar/colors.scm \
-	goobar/configuration.scm \
 	goobar/options.scm \
 	goobar/output/element.scm \
 	goobar/output.scm \
@@ -112,9 +112,10 @@ dist_doc_DATA = COPYING README.md
 
 EXTRA_DIST = \
 	$(SOURCES) \
-	$(TESTS) \
+	goobar/configuration.scm \
 	status/collector/disk.scm.in \
 	status/collector/pulseaudio.scm.in \
+	$(TESTS) \
 	build-aux/pre-inst-env.in \
 	build-aux/test-env.in \
 	guix.scm
@@ -122,3 +123,6 @@ EXTRA_DIST = \
 CLEANFILES = \
 	$(nobase_nodist_guilemodule_DATA) \
 	$(GOBJECTS)
+
+clean-local:
+	rm -f *.log

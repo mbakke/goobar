@@ -24,7 +24,9 @@ export XDG_RUNTIME_DIR="$tmp_dir"
 # Ensure the default configuration works.
 goobar --one-shot
 
-# Extract and test the README example.
-awk '/\(use-modules/{inc=1} /```/{inc=0} inc' README.md \
-    > "$tmp_dir/config.scm"
-goobar --one-shot -c "$tmp_dir/config.scm"
+# Extract and test the README example if present.
+if [ -r README.md ]; then
+  awk '/\(use-modules/{inc=1} /```/{inc=0} inc' README.md \
+      > "$tmp_dir/config.scm"
+  goobar --one-shot -c "$tmp_dir/config.scm"
+fi
