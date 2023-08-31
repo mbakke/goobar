@@ -106,7 +106,7 @@
          (string=? "N/A" (status->string status)))))
 
 (test-equal "weather-status, valid"
-  "26°C"
+  "🌗 26°C 🌬 6.6 m/s ↖"
   (with-http-server `((200 ,%yr-response-denpasar))
     (status->string
      (weather-status '("-8.6524973" . "115.2191175")
@@ -126,5 +126,18 @@
 ;;   (status->string (weather-status '("0" . "0")
 ;;                                   ;; As per RFC 5737.
 ;;                                   #:url "http://192.0.2.1")))
+
+(test-assert "wind-from-direction"
+  (and (string=? (wind-from-direction->icon 0) "⬇")
+       (string=? (wind-from-direction->icon 45) "↙")
+       (string=? (wind-from-direction->icon 90) "⬅")
+       (string=? (wind-from-direction->icon 135) "↖")
+       (string=? (wind-from-direction->icon 180) "⬆")
+       (string=? (wind-from-direction->icon 225) "↗")
+       (string=? (wind-from-direction->icon 270) "➡")
+       (string=? (wind-from-direction->icon 315) "↘")
+       (string=? (wind-from-direction->icon 360) "?")
+       (string=? (wind-from-direction->icon 3600) "?")
+       (string=? (wind-from-direction->icon #f) "?")))
 
 (exit (zero? (test-runner-fail-count (test-end))))
