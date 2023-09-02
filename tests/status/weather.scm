@@ -112,6 +112,13 @@
      (weather-status '("-8.6524973" . "115.2191175")
                      #:url (%local-url)))))
 
+(test-equal "weather-status, short"
+  "🌗 26°C"
+  (with-http-server `((200 ,%yr-response-denpasar))
+    (status->short-string
+     (weather-status '("-8.6524973" . "115.2191175")
+                     #:url (%local-url)))))
+
 (test-assert "weather-status, server error"
   (with-http-server '((500 "nope"))
     (let ((status (weather-status '("0" . "0") #:url (%local-url))))

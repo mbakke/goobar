@@ -82,7 +82,7 @@
                  (wind-speed-unit . ,wind-speed-unit)
                  (wind-from-direction . ,wind-from-direction)
                  (symbol-code . ,symbol-code))
-               format-weather-status))
+               format-weather-status format-weather-status-short))
             (make-status 'weather 'bad "<fetch failed>"
                          format-weather-status-failure)))
       (make-status 'weather 'bad "<no coordinates>"
@@ -151,17 +151,24 @@
 (define (format-weather-status-failure status)
   "N/A")
 
-(define (format-weather-status status)
+(define* (format-weather-status status #:optional short?)
   (let* ((data (status-data status))
          (temp (assoc-ref data 'temperature))
+         ;; TODO: Check and convert units!
+         (normalized-temp (inexact->exact (round temp)))
          (symbol-code (assoc-ref data 'symbol-code))
+         (symbol-icon (symbol-code->icon symbol-code))
          (wind-speed (assoc-ref data 'wind-speed))
          (wind-speed-unit (assoc-ref data 'wind-speed-unit))
          (wind-direction (assoc-ref data 'wind-from-direction)))
-    ;; TODO: Check and convert units!
-    (format #f "~a ~d°C 🌬 ~f ~a ~a"
-            (symbol-code->icon symbol-code)
-            (inexact->exact (round temp))
-            wind-speed
-            wind-speed-unit
-            (wind-from-direction->icon wind-direction))))
+    (if short?
+        (format #f "~a ~d°C" symbol-icon normalized-temp)
+        (format #f "~a ~d°C 🌬 ~f ~a ~a"
+                symbol-icon
+                (inexact->exact (round temp))
+                wind-speed
+                wind-speed-unit
+                (wind-from-direction->icon wind-direction)))))
+
+(define (format-weather-status-short status)
+  (format-weather-status status #t))
