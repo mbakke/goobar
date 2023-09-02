@@ -27,9 +27,13 @@
 ;;;
 ;;; Code:
 
-(define create-pid-directory! (@@ (goobar processes) create-pid-directory!))
+(define create-directory! (@@ (goobar processes) create-directory!))
+(define pid-directory (@@ (goobar processes) pid-directory))
 (define process-alive? (@@ (goobar processes) process-alive?))
 (define read-pid (@@ (goobar processes) read-pid))
+
+(define (create-pid-directory!)
+  (create-directory! (pid-directory)))
 
 (test-begin "processes")
 
@@ -80,9 +84,8 @@
                (create-pid-directory!))
              (lambda (key value)
                (and (= 1 value)
-                    (string=? (get-output-string error-output)
-                              (string-append "goobar: failed to create PID directory:"
-                                             " Permission denied\n")))))))))))
+                    (string-prefix? (string-append "goobar: failed to create " dir)
+                                    (get-output-string error-output)))))))))))
 
 (test-assert "create PID file, new"
   (call-with-temporary-directory
@@ -123,5 +126,13 @@
                  (format #f "goobar: PID file claimed by 1, not saving own PID (~d)~%"
                          pid)
                  (get-output-string error-output)))))))))
+
+(test-assert "create PID file, custom file name"
+  (call-with-temporary-directory
+   (lambda (dir)
+     (let ((pid (getpid))
+           (file-name (string-append dir "/pid")))
+       (and (save-pid-file file-name)
+            (= pid (read-pid file-name)))))))
 
 (exit (zero? (test-runner-fail-count (test-end))))

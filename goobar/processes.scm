@@ -29,13 +29,12 @@
 ;;;
 ;;; Code:
 
-(define (save-pid-file)
+(define* (save-pid-file #:optional destination)
   (let* ((pid-directory (pid-directory))
-         (file-name (string-append pid-directory "/pid"))
+         (file-name (or destination (string-append pid-directory "/pid")))
          (pid (getpid))
          (previous (read-pid file-name)))
-    (unless (file-exists? pid-directory)
-      (create-pid-directory!))
+    (unless destination (create-directory! pid-directory))
     (if previous
         (if (process-alive? previous)
             (format (current-error-port)
@@ -48,19 +47,20 @@
   (string-append (or (getenv "XDG_RUNTIME_DIR") (getenv "TMPDIR") "/tmp")
                  "/goobar"))
 
-(define (create-pid-directory!)
-  (with-exception-handler
-      (lambda (err)
-        (let ((kind (exception-kind err))
-              (args (exception-args err)))
-          ;; Fail gracefully upon exception.
-          (format (current-error-port)
-                  "goobar: failed to create PID directory: ~a~%"
-                  (car (exception-irritants err)))
-          (exit 1)))
-    (lambda ()
-      (mkdir (pid-directory)))
-    #:unwind? #t))
+(define (create-directory! dir)
+  (unless (file-exists? dir)
+    (with-exception-handler
+        (lambda (err)
+          (let ((kind (exception-kind err))
+                (args (exception-args err)))
+            ;; Fail gracefully upon exception.
+            (format (current-error-port)
+                    "goobar: failed to create ~a: ~a~%"
+                    dir
+                    (car (exception-irritants err)))
+            (exit 1)))
+      (lambda () (mkdir dir))
+      #:unwind? #t)))
 
 (define (read-pid file)
   ;; Return the number contained in FILE as an integer.  If FILE does not exist,

@@ -20,7 +20,7 @@
   #:use-module (srfi srfi-19)
   #:use-module (goobar options)
   #:use-module (goobar output)
-  #:use-module (goobar processes)
+  #:autoload (goobar processes) (save-pid-file)
   #:autoload (goobar configuration) (default-configuration)
   #:export (goobar-main))
 
@@ -51,6 +51,7 @@
          (interval (string->number (option-ref options 'interval "5")))
          (one-shot (option-ref options 'one-shot #f))
          (output-format (option-ref options 'output-format #f))
+         (pid-file (option-ref options 'pid-file #f))
          (printer (cond ((string? output-format)
                          (get-output (string->symbol output-format)))
                         ((isatty? (current-output-port))
@@ -61,7 +62,10 @@
          (tailer (output-tail printer))
          (footer (output-foot printer)))
     (when help (display-help-and-exit))
-    (save-pid-file)
+    (when pid-file
+      (if (string? pid-file)
+          (save-pid-file pid-file)
+          (save-pid-file)))
     (format (current-error-port) "goobar: using '~a' output~%"
             (output-type printer))
     (when header (display header))
