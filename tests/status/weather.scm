@@ -92,11 +92,17 @@
 
 (test-begin "weather")
 
-(test-equal "location->coordinates, valid"
-  '("-8.6524973" . "115.2191175")
+(test-equal "location->coordinates"
+  '("-8.65" . "115.22")
   (with-http-server `((200 ,%osm-location-result-denpasar))
     ;; TODO: How to mock with https_proxy instead of passing #:url?
     (location->coordinates "Denpasar,Bali,Indonesia"
+                           #:url (%local-url))))
+
+(test-equal "location->coordinates, precise"
+  '("-8.6524973" . "115.2191175")
+  (with-http-server `((200 ,%osm-location-result-denpasar))
+    (location->coordinates "Denpasar,Bali,Indonesia" #t
                            #:url (%local-url))))
 
 (test-assert "weather-status, missing coordinates"

@@ -27,10 +27,23 @@
             symbol-code->icon
             weather-status))
 
-(define* (location->coordinates name #:key
+(define (maybe-number->number n)
+  (if (string? n) (string->number n) n))
+
+(define* (inexact-number->string n #:optional decimal-points)
+  (let ((fmt (if decimal-points
+                 (format #f "~~,~df" decimal-points)
+                 "~f")))
+    (format #f fmt n)))
+
+(define* (location->coordinates name #:optional precise? #:key
                                 (url "https://nominatim.openstreetmap.org"))
   ;; Return a (lat . lon) pair based on NAME.  Example:
-  ;; (location->coordinates "bardufoss,norway") => '("69.065637" . "18.5159237")
+  ;; (location->coordinates "bardufoss,norway") => '("69.07" . "18.52")
+  ;; Unless PRECISE? is true, round down to two decimal points
+  ;; (about ~1.1km precision).
+  ;; The yr.no API asks to use a maximum of four decimals:
+  ;;   https://developer.yr.no/doc/locationforecast/HowTO/
   (let ((data (http-fetch/cached
                (string-append url "/search?q="
                               (uri-encode name) "&format=json")
@@ -43,8 +56,11 @@
        #f)
       (_
        (let* ((parsed (call-with-input-string data json-read))
-              (lst (vector-ref parsed 0)))
-         `(,(assoc-ref lst 'lat) . ,(assoc-ref lst 'lon)))))))
+              (lst (vector-ref parsed 0))
+              (lat (maybe-number->number (assoc-ref lst 'lat)))
+              (lon (maybe-number->number (assoc-ref lst 'lon)))
+              (dec (if precise? #f 2)))
+         `(,(inexact-number->string lat dec) . ,(inexact-number->string lon dec)))))))
 
 (define* (weather-status coordinates #:key
                          (url "https://api.met.no"))
