@@ -62,14 +62,15 @@
               (dec (if precise? #f 2)))
          `(,(inexact-number->string lat dec) . ,(inexact-number->string lon dec)))))))
 
-(define* (weather-status coordinates #:key
+(define* (weather-status coordinates #:optional altitude #:key
                          (url "https://api.met.no"))
   (if (and coordinates (pair? coordinates))
       (let ((weather (http-fetch/cached
                       (string-append url "/weatherapi"
                                      "/locationforecast/2.0/compact"
                                      "?lat=" (car coordinates)
-                                     "&lon=" (cdr coordinates))
+                                     "&lon=" (cdr coordinates)
+                                     (format #f "~@[&altitude=~d~]" altitude))
                       600)))
         (if weather
             (let* ((parsed (call-with-input-string weather json-read))
