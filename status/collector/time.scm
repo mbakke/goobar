@@ -19,16 +19,30 @@
   #:use-module (status)
   #:export (time-status))
 
-(define* (time-status #:optional (template "%F %T")
+(define* (time-status #:optional
+                      (template "%F %T")
+                      (short-template "%T")
                       #:key
                       (format format-time-status)
+                      (format-short format-time-status-short)
                       (time-zone #f))
   (let* ((now (current-time))
          (local (if (string? time-zone)
                     (localtime now time-zone)
-                    (localtime now)))
-         (formatted (strftime template local)))
-    (make-status 'time 'neutral formatted format)))
+                    (localtime now))))
+    (make-status 'time 'neutral
+                 `((local-time . ,local)
+                   (template . ,template)
+                   (short-template . ,short-template))
+                 format format-short)))
 
-(define (format-time-status status)
-  (status-data status))
+(define* (format-time-status status #:optional short?)
+  (let* ((data (status-data status))
+         (local-time (assoc-ref data 'local-time))
+         (template (if short?
+                       (assoc-ref data 'short-template)
+                       (assoc-ref data 'template))))
+    (strftime template local-time)))
+
+(define (format-time-status-short status)
+  (format-time-status status #t))
