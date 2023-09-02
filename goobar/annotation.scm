@@ -36,7 +36,9 @@
                                 ((? string?) obj)
                                 ;; TODO: Maybe error here..?
                                 (_ #f)))
-                   (short-text #f)
+                   (short-text (match obj
+                                 ((? status?) (status->short-string obj))
+                                 (_ #f)))
                    (color (match obj
                             ((? status?) (state->color (status-state obj)))
                             (_ #f)))

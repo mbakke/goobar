@@ -19,9 +19,31 @@
   #:use-module (status)
   #:use-module (goobar annotation)
   #:use-module (goobar output element)
+  #:use-module (ice-9 format)
   #:use-module (srfi srfi-64))
 
 (test-begin "annotation")
+
+(test-eq "element-short-text, status, proc missing"
+  #f
+  (element-short-text
+   (annotate
+    (make-status 'test 'neutral #t (const #t)))))
+
+(test-equal "element-short-text, status, short proc"
+  "42"
+  (element-short-text
+   (annotate
+    (make-status 'test 'neutral 42 (const "")
+                 (lambda (s) (format #f "~d" (status-data s)))))))
+
+(test-eq "element-short-text, string"
+  #f
+  (element-short-text (annotate "foo")))
+
+(test-equal "element-full-text, string"
+  "foo"
+  (element-full-text (annotate "foo")))
 
 (test-equal "backlight icon, 100%"
   "🔆"
