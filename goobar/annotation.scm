@@ -97,8 +97,9 @@
       ('ethernet "E:")
       ('ipv6 "IPv6")
       ('load "🏋")
-      ;; Why no IC icon in Unicode?  🐏 or 🍪 is probably too abstract...
-      ('memory "M:")
+      ;; How come Unicode lacks an IC!  This may be too abstract, but is
+      ;; offset by cuteness...  🍪 could work too, but very silly!
+      ('memory "🐏")
       ('pulseaudio
        (let ((data (status-data status)))
          (if (assoc-ref data 'mute?)
