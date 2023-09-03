@@ -24,6 +24,7 @@
   #:use-module (ice-9 exceptions)
   #:use-module (ice-9 format)
   #:use-module (ice-9 textual-ports)
+  #:use-module (srfi srfi-19)
   #:use-module (srfi srfi-26)
   #:use-module (srfi srfi-71)
   #:export (http-fetch http-fetch/cached))
@@ -50,8 +51,9 @@
                      (headers '())
                      (keep-alive? #f)
                      (log-port (current-error-port)))
-  ;; Return the data from URI as a string, following redirects.
-  ;; Return #f if the final response is anything other than 200.
+  "Return the received body from URI as a string, following redirects, granted
+that the final HTTP response code was 200.  Return 'not-modified if the HTTP
+response code was 304.  Return #f for any other responses."
   (with-exception-handler
       (lambda (err)
         (cond ((eq? 'getaddrinfo-error (exception-kind err))
@@ -80,6 +82,8 @@
         (case (response-code response)
           ((200)                        ;OK
            (decode response body))
+          ((304)                        ;not modified
+           'not-modified)
           ((301                         ;moved permanently
             302                         ;found (redirection)
             303                         ;see other
@@ -144,11 +148,17 @@
                            (headers '())
                            (log-port (current-error-port)))
   (let ((result (http-fetch uri #:headers headers #:log-port log-port)))
-    (call-with-output-file cache
-      (lambda (port)
-        ;; TODO: Serve stale content if result is false and cache exist?
-        (format port (or result ""))))
-    result))
+    (if (and (eq? result 'not-modified)
+             ;; Do an additional sanity check in case a server gives 304
+             ;; without us sending if-modified-since.
+             (file-exists? cache))
+        (call-with-input-file cache get-string-all)
+        (let ((fmt (or result "")))
+          (call-with-output-file cache
+            (lambda (port)
+              ;; TODO: Serve stale content if result is false and cache exist?
+              (format port fmt)))
+          result))))
 
 ;; TODO: Clean up stale cache..?
 (define* (http-fetch/cached uri
@@ -158,13 +168,16 @@
                             (log-port (current-error-port)))
   (create-cache-directory!)
 
-  ;; TODO: support if-modified-since..!
+  ;; TODO: Support 'Expires'..!
   (let ((cache-file (cache-file-for-uri uri)))
     (if (file-exists? cache-file)
-        (let* ((now (current-time))
+        (let* ((now (current-time 'time-utc))
                (stat (stat cache-file))
                (size (stat:size stat))
-               (age (- now (stat:mtime stat))))
+               (mtime (make-time time-utc 0 (stat:mtime stat)))
+               (age (time-second (time-difference now mtime)))
+               (headers `((if-modified-since . ,(time-utc->date mtime))
+                          ,@headers)))
           (cond
            ;; TODO: Asynchronously update cache.
            ((> age ttl) (fetch-with-cache uri cache-file
