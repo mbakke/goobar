@@ -64,6 +64,6 @@
 ;; TODO: Better representation and defaults + calculate percentages.
 (define (format-memory-status status)
   (let ((data (status-data status)))
-    (format #f "~1,1f GiB | ~1,1f GiB"
+    (format #f "~,1f GiB | ~,1f GiB"
             (/ (assoc-ref data 'memory-used) 1024 1024)
             (/ (assoc-ref data 'memory-available) 1024 1024))))
