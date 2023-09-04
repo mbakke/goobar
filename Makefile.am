@@ -20,7 +20,9 @@ endif
 # <http://lists.gnu.org/archive/html/guile-devel/2010-07/msg00125.html>
 # for details.
 guile_install_go_files = install-nobase_guileobjectDATA
-$(guile_install_go_files): install-nobase_guilemoduleDATA
+$(guile_install_go_files): \
+	install-nobase_guilemoduleDATA \
+	install-nobase_nodist_guilemoduleDATA
 
 GUILE_WARNINGS = -Wunbound-variable -Warity-mismatch -Wformat
 
