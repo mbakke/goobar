@@ -1,0 +1,61 @@
+on:
+  push:
+  pull_request:
+
+name: Test
+jobs:
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install dependencies
+        run: sudo apt-get -y install guile-3.0 guile-3.0-dev jq
+      - name: Bootstrap
+        run: autoreconf -vif
+      - name: Configure
+        run: ./configure --prefix=/usr --without-pulseaudio
+      - name: Build
+        run: make -j $(nproc)
+      - name: Check
+        run: make -j $(nproc) check
+      - name: Upload test logs
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-logs
+          path: '*.log'
+      - name: Check distribution
+        run: make -j $(nproc) distcheck
+        env:
+          DISTCHECK_CONFIGURE_FLAGS: --without-pulseaudio
+      - name: Upload tarball
+        uses: actions/upload-artifact@v3
+        with:
+          name: goobar-dist.tar.gz
+          path: goobar-*.tar.gz
+          if-no-files-found: error
+  install:
+    name: Install
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download tarball
+        uses: actions/download-artifact@v3
+        with:
+          name: goobar-dist.tar.gz
+      - name: Extract
+        run: tar -xf goobar-*.tar.gz --strip-components=1
+      - name: Install dependencies
+        run: sudo apt-get -y install guile-3.0 guile-3.0-dev pulseaudio-utils
+      - name: Configure
+        run: ./configure --prefix=/usr
+      - name: Build
+        run: make -j $(nproc)
+      - name: Install
+        run: sudo make install
+      - name: Run
+        run: /usr/bin/goobar --one-shot -o term
+      - name: Uninstall
+        run: sudo make uninstall
