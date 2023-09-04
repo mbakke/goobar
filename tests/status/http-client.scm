@@ -59,7 +59,6 @@
 ;;; Cache
 ;;;
 
-(define %cache-directory (@@ (status http-client) %cache-directory))
 (define cache-file-for-uri (@@ (status http-client) cache-file-for-uri))
 
 (test-equal "cache-file-for-uri"

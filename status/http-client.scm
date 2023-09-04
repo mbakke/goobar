@@ -107,12 +107,32 @@ response code was 304.  Return #f for any other responses."
 ;;; Caching.
 ;;;
 
-(define %cache-directory
-  (or (and=> (getenv "XDG_CACHE_HOME")
-             (lambda (dir) (string-append dir "/goobar/http")))
-      (and=> (getenv "HOME")
-             (lambda (dir) (string-append dir "/.cache/goobar/http")))
-      (string-append "/tmp/goobar/http-cache")))
+(define (create-directory+parent dir)
+  (let* ((parent (dirname dir))
+         (grandparent (dirname parent)))
+    (if (file-exists? grandparent)
+        (if (file-exists? parent)
+            (unless (file-exists? dir)
+              (mkdir dir))
+            (begin (mkdir parent) (mkdir dir)))
+        (begin
+          (format (current-error-port)
+                  "The directory ~a does not exist, please create it.~%"
+                  grandparent)
+          (exit 1)))))
+
+(define (cache-directory)
+  (let ((dir (or (and=> (getenv "XDG_CACHE_HOME")
+                        (lambda (dir) (string-append dir "/goobar/http")))
+                 (and=> (getenv "HOME")
+                        (lambda (dir) (string-append dir "/.cache/goobar/http")))
+                 (string-append "/tmp/goobar/http-cache"))))
+    ;; Create the directory here in lack of a better place.
+    (if (file-exists? dir)
+        dir
+        (begin
+          (create-directory+parent dir)
+          dir))))
 
 (define (digest-sha256 str)
   ;; Return a hexadecimal SHA256 digest of STR.
@@ -127,22 +147,7 @@ response code was 304.  Return #f for any other responses."
   (let ((sha256 (digest-sha256 (if (uri? uri)
                                    (uri->string uri)
                                    uri))))
-    (string-append %cache-directory "/" sha256)))
-
-(define (create-cache-directory!)
-  (let* ((cache %cache-directory)
-         (parent (dirname cache))
-         (system (dirname parent)))
-    (if (file-exists? system)
-        (if (file-exists? parent)
-            (unless (file-exists? cache)
-              (mkdir cache))
-            (begin (mkdir parent) (mkdir cache)))
-        (begin
-          (format (current-error-port)
-                  "The directory ~a does not exist, please create it.~%"
-                  system)
-          (exit 1)))))
+    (string-append (cache-directory) "/" sha256)))
 
 (define* (fetch-with-cache uri cache #:key
                            (headers '())
@@ -171,7 +176,9 @@ response code was 304.  Return #f for any other responses."
                             #:key
                             (headers '())
                             (log-port (current-error-port)))
-  (create-cache-directory!)
+  "Fetch the resource at URI, following redirects, and cache the result for TTL
+seconds.  Return the body as a string provided the HTTP response code was 200.
+Return #f if the final response was anything other than 200."
 
   ;; TODO: Support 'Expires'..!
   (let ((cache-file (cache-file-for-uri uri)))
