@@ -86,6 +86,19 @@
            (utime cache-file 0 0)
            (http-fetch/cached (%local-url))))))))
 
+(test-assert "fetch with cache, not modified, updated timestamp"
+  (with-http-server '((304 #f))
+    (call-with-temporary-directory
+     (lambda (dir)
+       (with-environment-variables `(("XDG_CACHE_HOME" . ,dir))
+         (let ((cache-file (cache-file-for-uri (%local-url))))
+           (call-with-output-file cache-file
+             (lambda (port) (format port "never change")))
+           (utime cache-file 0 0)
+           (http-fetch/cached (%local-url))
+           (<= (- (current-time) (stat:mtime (stat cache-file)))
+               1)))))))
+
 (test-eq "fetch with cache, not modified, yet no cache"
   #f
   (with-http-server '((304 "derp"))

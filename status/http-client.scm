@@ -152,7 +152,12 @@ response code was 304.  Return #f for any other responses."
              ;; Do an additional sanity check in case a server gives 304
              ;; without us sending if-modified-since.
              (file-exists? cache))
-        (call-with-input-file cache get-string-all)
+        (let* ((now (current-time 'time-utc))
+               (ts (time-second now)))
+          ;; Update the timestamp to avoid probing the server until
+          ;; TTL expires again.
+          (utime cache ts ts)
+          (call-with-input-file cache get-string-all))
         (let ((fmt (or result "")))
           (call-with-output-file cache
             (lambda (port)
