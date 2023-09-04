@@ -1,5 +1,6 @@
 ;;; Copyright © 2014, 2015, 2016, 2017, 2019 Ludovic Courtès <ludo@gnu.org>
 ;;; Copyright © 2021 Maxime Devos <maximedevos@telenet.be>
+;;; Copyright © 2023 Marius Bakke
 ;;;
 ;;; This file is part of Goobar.
 ;;;
@@ -17,6 +18,7 @@
 ;;; along with Goobar.  If not, see <http://www.gnu.org/licenses/>.
 
 (define-module (tests http)
+  #:use-module (tests helper)
   #:use-module (ice-9 threads)
   #:use-module (web server)
   #:use-module (web server http)
@@ -143,6 +145,12 @@ The port listened at will be set for the dynamic extent of THUNK."
 (define-syntax with-http-server
   (syntax-rules ()
     ((_ responses+data body ...)
-     (call-with-http-server responses+data (lambda () body ...)))))
+     ;; Call with a temporary cache directory for convenience, as consumers
+     ;; of this likely also use http-client.  Mainly to avoid polluting the
+     ;; developers cache with tests..!
+     (call-with-temporary-directory
+      (lambda (dir)
+        (with-environment-variables `(("XDG_CACHE_HOME" . ,dir))
+          (call-with-http-server responses+data (lambda () body ...))))))))
 
 ;;; http.scm ends here

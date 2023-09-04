@@ -17,7 +17,6 @@
 
 (define-module (test-http-client)
   #:use-module (status http-client)
-  #:use-module (tests helper)
   #:use-module (tests http)
   #:use-module (web response)
   #:use-module (web server)
@@ -68,112 +67,82 @@
 
 (test-assert "fetch with cache, new"
   (with-http-server '((200 "yay"))
-    (call-with-temporary-directory
-     (lambda (dir)
-       (with-environment-variables `(("XDG_CACHE_HOME" . ,dir))
-         (http-fetch/cached (%local-url)))))))
+    (http-fetch/cached (%local-url))))
 
 (test-equal "fetch with cache, not modified"
   "never change"
   (with-http-server '((304 #f))
-    (call-with-temporary-directory
-     (lambda (dir)
-       (with-environment-variables `(("XDG_CACHE_HOME" . ,dir))
-         (let ((cache-file (cache-file-for-uri (%local-url))))
-           (call-with-output-file cache-file
-             (lambda (port) (format port "never change")))
-           (utime cache-file 0 0)
-           (http-fetch/cached (%local-url))))))))
+    (let ((cache-file (cache-file-for-uri (%local-url))))
+      (call-with-output-file cache-file
+        (lambda (port) (format port "never change")))
+      (utime cache-file 0 0)
+      (http-fetch/cached (%local-url)))))
 
 (test-assert "fetch with cache, not modified, updated timestamp"
   (with-http-server '((304 #f))
-    (call-with-temporary-directory
-     (lambda (dir)
-       (with-environment-variables `(("XDG_CACHE_HOME" . ,dir))
-         (let ((cache-file (cache-file-for-uri (%local-url))))
-           (call-with-output-file cache-file
-             (lambda (port) (format port "never change")))
-           (utime cache-file 0 0)
-           (http-fetch/cached (%local-url))
-           (<= (- (current-time) (stat:mtime (stat cache-file)))
-               1)))))))
+    (let ((cache-file (cache-file-for-uri (%local-url))))
+      (call-with-output-file cache-file
+        (lambda (port) (format port "never change")))
+      (utime cache-file 0 0)
+      (http-fetch/cached (%local-url))
+      (<= (- (current-time) (stat:mtime (stat cache-file)))
+          1))))
 
 (test-eq "fetch with cache, not modified, yet no cache"
   #f
   (with-http-server '((304 "derp"))
-    (call-with-temporary-directory
-     (lambda (dir)
-       (with-environment-variables `(("XDG_CACHE_HOME" . ,dir))
-         (http-fetch/cached (%local-url)))))))
+    (http-fetch/cached (%local-url))))
 
 (test-equal "fetch with cache, valid cache"
   "hi!"
   (with-http-server '((200 "yay"))
-    (call-with-temporary-directory
-     (lambda (dir)
-       (with-environment-variables `(("XDG_CACHE_HOME" . ,dir))
-         (call-with-output-file (cache-file-for-uri (%local-url))
-           (lambda (port) (format port "hi!")))
-         (http-fetch/cached (%local-url)))))))
+    (call-with-output-file (cache-file-for-uri (%local-url))
+      (lambda (port) (format port "hi!")))
+    (http-fetch/cached (%local-url))))
 
 (test-equal "fetch with cache, expired cache"
   "yay"
   (with-http-server '((200 "yay"))
-    (call-with-temporary-directory
-     (lambda (dir)
-       (with-environment-variables `(("XDG_CACHE_HOME" . ,dir))
-         (let ((cache-file (cache-file-for-uri (%local-url))))
-           (call-with-output-file cache-file
-             (lambda (port) (format port "nope")))
-           (utime cache-file 0 0)
-           (http-fetch/cached (%local-url))
-           (let ((stat (stat cache-file)))
-             (and (zero? (- (current-time) (stat:mtime stat)))
-                  (call-with-input-file cache-file get-string-all)))))))))
+    (let ((cache-file (cache-file-for-uri (%local-url))))
+      (call-with-output-file cache-file
+        (lambda (port) (format port "nope")))
+      (utime cache-file 0 0)
+      (http-fetch/cached (%local-url))
+      (let ((stat (stat cache-file)))
+        (and (zero? (- (current-time) (stat:mtime stat)))
+             (call-with-input-file cache-file get-string-all))))))
 
 (test-eq "fetch with cache, error"
   #f
   (with-http-server '((500 "derp"))
-    (call-with-temporary-directory
-     (lambda (dir)
-       (with-environment-variables `(("XDG_CACHE_HOME" . ,dir))
-         (http-fetch/cached (%local-url)))))))
+    (http-fetch/cached (%local-url))))
 
 (test-eqv "fetch with cache, error, file size"
   0
   (with-http-server '((500 "derp"))
-    (call-with-temporary-directory
-     (lambda (dir)
-       (with-environment-variables `(("XDG_CACHE_HOME" . ,dir))
-         (http-fetch/cached (%local-url))
-         (stat:size (stat (cache-file-for-uri (%local-url)))))))))
+    (http-fetch/cached (%local-url))
+    (stat:size (stat (cache-file-for-uri (%local-url))))))
 
 (test-assert "fetch with cache, error, cached"
   (with-http-server '((500 "derp"))
-    (call-with-temporary-directory
-     (lambda (dir)
-       (with-environment-variables `(("XDG_CACHE_HOME" . ,dir))
-         (let ((cache-file (cache-file-for-uri (%local-url)))
-               (30s-ago (- (current-time) 30)))
-           (call-with-output-file cache-file
-             (lambda (port) (format port "")))
-           (utime cache-file 30s-ago 30s-ago)
-           (http-fetch/cached (%local-url))
-           (>= (- (current-time) (stat:mtime (stat cache-file)))
-               30)))))))
+    (let ((cache-file (cache-file-for-uri (%local-url)))
+          (30s-ago (- (current-time) 30)))
+      (call-with-output-file cache-file
+        (lambda (port) (format port "")))
+      (utime cache-file 30s-ago 30s-ago)
+      (http-fetch/cached (%local-url))
+      (>= (- (current-time) (stat:mtime (stat cache-file)))
+          30))))
 
 (test-assert "fetch with cache, error, expired cache"
   (with-http-server '((500 "derp"))
-    (call-with-temporary-directory
-     (lambda (dir)
-       (with-environment-variables `(("XDG_CACHE_HOME" . ,dir))
-         (let ((cache-file (cache-file-for-uri (%local-url))))
-           (call-with-output-file cache-file
-             (lambda (port) (format port "")))
-           (utime cache-file 0 0)
-           (http-fetch/cached (%local-url))
-           (<= (- (current-time) (stat:mtime (stat cache-file)))
-               1)))))))
+    (let ((cache-file (cache-file-for-uri (%local-url))))
+      (call-with-output-file cache-file
+        (lambda (port) (format port "")))
+      (utime cache-file 0 0)
+      (http-fetch/cached (%local-url))
+      (<= (- (current-time) (stat:mtime (stat cache-file)))
+          1))))
 
 (with-http-server `((200 "yay"))
   (let* ((initial-url (%local-url))
@@ -186,13 +155,10 @@
                    (current-error-port error-output))
       (with-http-server `((,redirect ""))
         (test-assert "fetch with cache, redirect"
-          (call-with-temporary-directory
-           (lambda (dir)
-             (with-environment-variables `(("XDG_CACHE_HOME" . ,dir))
-               (let ((result (http-fetch/cached (%local-url))))
-                 (and (string=? result "yay")
-                      (string=? (get-output-string error-output)
-                                (format #f "following redirect to ~a...~%"
-                                        initial-url))))))))))))
+          (let ((result (http-fetch/cached (%local-url))))
+            (and (string=? result "yay")
+                 (string=? (get-output-string error-output)
+                           (format #f "following redirect to ~a...~%"
+                                   initial-url)))))))))
 
 (exit (zero? (test-runner-fail-count (test-end))))
