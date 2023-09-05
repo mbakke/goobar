@@ -16,6 +16,8 @@
 ;;; along with Goobar. If not, see <https://www.gnu.org/licenses/>.
 
 (define-module (goobar options)
+  #:use-module (ice-9 format)
+  #:use-module (ice-9 match)
   #:export (%options display-help-and-exit))
 
 ;; TODO: Print better error messages when validation fails.
@@ -23,35 +25,46 @@
   (and (string-every char-set:digit opt)
        (positive? (string->number opt))))
 
+(define %supported-outputs
+  '("term" "i3bar"))
+
 (define (valid-output? opt)
-  (member opt '("term" "i3bar")))
+  (member opt %supported-outputs))
 
 (define %options
   `((version (single-char #\v) (value #f))
     (help (single-char #\h) (value #f))
-    (config-file (single-char #\c)
-                 (value #t)
-                 (predicate ,file-exists?))
+    (config (single-char #\c)
+            (value #t)
+            (predicate ,file-exists?))
     (interval (single-char #\i)
               (value #t)
               (predicate ,valid-interval?))
-    ;; TODO: Why is -1 not working?
+    ;; TODO: Support -1 when <https://bugs.gnu.org/42669> is merged.
     (one-shot (value #f)) ;(single-char #\1)
-    (output-format (single-char #\o)
-                   (value #t)
-                   (predicate ,valid-output?))
+    (output (single-char #\o)
+            (value #t)
+            (predicate ,valid-output?))
     (pid-file (single-char #\p)
               (value optional))))
 
 (define (display-help-and-exit)
-  (display "\
+  (format #t  "\
 Usage: goobar [options]
-  -h, --help             Show this text.
-  -c, --config-file      Use this configuration file instead of the default.
-  -i, --interval         Seconds to wait between iterations (default 5).
-  -o, --output-format    Which output format to use.  Either 'term' or 'i3bar'.
-  -p, --pid-file[=FILE]  Save the PID to FILE.  If FILE is omitted, the
-                         PID is stored in $XDG_RUNTIME_DIR/goobar/pid.
-  --one-shot             Run once and exit instead of looping.
-")
+  -h, --help                Show this text.
+  -c, --config=FILE         Use FILE instead of the default configuration.
+  -i, --interval=INTERVAL   Wait INTERVAL seconds between iterations (default 5).
+  -o, --output=FORMAT       Use FORMAT style output instead of guessing.
+                            Supported values are: ~a.
+  -p, --pid-file[=FILE]     Save the PID to FILE.  If FILE is omitted, the
+                            PID is stored in $XDG_RUNTIME_DIR/goobar/pid.
+  --one-shot                Run once and exit instead of looping.
+"
+          (match %supported-outputs
+            ((outputs ... last)
+             (string-append (string-join (map (lambda (output)
+                                                (string-append "'" output "'"))
+                                              outputs)
+                                         ", ")
+                            ", and '" last "'"))))
   (exit 0))

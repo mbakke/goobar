@@ -50,7 +50,7 @@
          (config-file (option-ref options 'config-file %config-file))
          (interval (string->number (option-ref options 'interval "5")))
          (one-shot (option-ref options 'one-shot #f))
-         (output-format (option-ref options 'output-format #f))
+         (output-format (option-ref options 'output #f))
          (pid-file (option-ref options 'pid-file #f))
          (printer (cond ((string? output-format)
                          (get-output (string->symbol output-format)))
@@ -66,8 +66,9 @@
       (if (string? pid-file)
           (save-pid-file pid-file)
           (save-pid-file)))
-    (format (current-error-port) "goobar: using '~a' output~%"
-            (output-type printer))
+    (unless output-format
+      (format (current-error-port) "goobar: auto-detected '~a' output~%"
+              (output-type printer)))
     (when header (display header))
     (while #true
       (if config-file
