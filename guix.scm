@@ -27,10 +27,10 @@
               (method git-fetch)
               (uri (git-reference
                     (url "https://github.com/mbakke/guile-netlink")
-                    (commit "c259626029e943435861bef02ba44349c95b422c")))
+                    (commit "890cffcbc085ed12c8341dc5251b1b7fc7457288")))
               (sha256
                (base32
-                "1zb8lmigafkcyhmy2caly6rxz42cilg49nwvka15r5q145d3gb7j"))))))
+                "12nxb24sqqcfffa0p1yvkn83b2qxls196i1f8inyn92h2fy4hkcc"))))))
 
 ;; ... and a custom Guile with statvfs bindings ...
 (define guile/statvfs
