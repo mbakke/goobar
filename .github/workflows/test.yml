@@ -11,7 +11,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Install dependencies
-        run: sudo apt-get -y install guile-3.0 guile-3.0-dev jq
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install guile-3.0 guile-3.0-dev jq
       - name: Bootstrap
         run: autoreconf -vif
       - name: Configure
@@ -48,7 +50,9 @@ jobs:
       - name: Extract
         run: tar -xf goobar-*.tar.gz --strip-components=1
       - name: Install dependencies
-        run: sudo apt-get -y install guile-3.0 guile-3.0-dev pulseaudio-utils
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install guile-3.0 guile-3.0-dev pulseaudio-utils
       - name: Configure
         run: ./configure --prefix=/usr
       - name: Build
