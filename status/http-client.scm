@@ -188,8 +188,11 @@ Return #f if the final response was anything other than 200."
                (size (stat:size stat))
                (mtime (make-time time-utc 0 (stat:mtime stat)))
                (age (time-second (time-difference now mtime)))
-               (headers `((if-modified-since . ,(time-utc->date mtime))
-                          ,@headers)))
+               (headers (if (> size 0)
+                            `((if-modified-since . ,(time-utc->date mtime))
+                              ,@headers)
+                            ;; Don't add if-modified-since on a negative cache.
+                            headers)))
           (cond
            ;; TODO: Asynchronously update cache.
            ((> age ttl) (fetch-with-cache uri cache-file
